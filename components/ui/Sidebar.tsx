@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { sidebarLinks } from '@/components/ui/constants'
 import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
+import Footer from '../Footer';
 
 
 
@@ -58,7 +59,7 @@ return (
             USER
         </nav>
 
-        FOOTER
+        <Footer user = {user}/>
     </section>
   )
 }

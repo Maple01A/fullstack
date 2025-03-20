@@ -1,10 +1,14 @@
 import TotalBalanceBox from '@/components/ui/TotalBalanceBox';
 import HeaderBox from '@/components/ui/HeaderBox'
 import RightSidebar from '@/components/ui/RightSidebar';
+import { getLoggedInUser } from '@/lib/actions/user.actions';
 
-const loggedIn  = {firstName: 'Guest', lastName: 'User', email: 'contact@gmail.com'}; 
 
-const Home = () => {
+
+const Home = async () => {
+  
+  const loggedIn  = await getLoggedInUser(); 
+
   return (
     <section className='home'>
       <div className='home-content'>
@@ -12,7 +16,7 @@ const Home = () => {
           <HeaderBox
             type='greeting'
             title='こんにちは'
-            user={loggedIn?.firstName || 'Guest'}
+            user={loggedIn?.name || 'Guest'}
             subtext='あなたのアカウント情報'
           />
           <TotalBalanceBox
