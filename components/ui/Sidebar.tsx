@@ -25,7 +25,7 @@ return (
                 className='size-24'
                 max-xl='size-14'
             />
-            <h1 className='sidebar-logo'>Horizon</h1>
+            <h1 className='sidebar-logo'>Test</h1>
             </Link>
 
             {sidebarLinks.map((item) => {

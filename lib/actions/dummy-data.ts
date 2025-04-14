@@ -1,0 +1,106 @@
+'use server';
+
+// ダミーの口座データ
+export const generateDummyAccounts = async () => {
+  return [
+    {
+      id: 'account-1',
+      $id: 'account-1',
+      availableBalance: 125000,
+      currentBalance: 125000,
+      officialName: '普通預金',
+      mask: '1234',
+      institutionId: 'institution-1',
+      name: '三菱UFJ銀行',
+      type: 'depository',
+      subtype: 'checking',
+      appwriteItemId: 'item-1',
+      sharableId: 'share-1',
+    },
+    {
+      id: 'account-2',
+      $id: 'account-2',
+      availableBalance: 450000,
+      currentBalance: 450000,
+      officialName: '普通預金',
+      mask: '5678',
+      institutionId: 'institution-2',
+      name: 'みずほ銀行',
+      type: 'depository',
+      subtype: 'savings',
+      appwriteItemId: 'item-2',
+      sharableId: 'share-2',
+    },
+    {
+      id: 'account-3',
+      $id: 'account-3',
+      availableBalance: 78000,
+      currentBalance: 78000,
+      officialName: 'クレジットカード',
+      mask: '9012',
+      institutionId: 'institution-3',
+      name: '三井住友カード',
+      type: 'credit',
+      subtype: 'credit_card',
+      appwriteItemId: 'item-3',
+      sharableId: 'share-3',
+    }
+  ];
+};
+
+// ダミーのトランザクションデータ
+export const generateDummyTransactions = async () => {
+  return [
+    {
+      id: 'transaction-1',
+      $id: 'transaction-1',
+      name: '食料品店',
+      paymentChannel: 'in_store',
+      type: 'debit',
+      accountId: 'account-1',
+      amount: 3500,
+      pending: false,
+      category: '食費',
+      date: '2023-10-15',
+      image: '',
+      $createdAt: '2023-10-15',
+      channel: 'in_store',
+      senderBankId: 'account-1',
+      receiverBankId: '',
+    },
+    {
+      id: 'transaction-2',
+      $id: 'transaction-2',
+      name: '交通費',
+      paymentChannel: 'in_store',
+      type: 'debit',
+      accountId: 'account-1',
+      amount: 1200,
+      pending: false,
+      category: '交通費',
+      date: '2023-10-14',
+      image: '',
+      $createdAt: '2023-10-14',
+      channel: 'in_store',
+      senderBankId: 'account-1',
+      receiverBankId: '',
+    },
+    {
+      id: 'transaction-3',
+      $id: 'transaction-3',
+      name: 'レストラン',
+      paymentChannel: 'in_store',
+      type: 'debit',
+      accountId: 'account-2',
+      amount: 7800,
+      pending: false,
+      category: '食費',
+      date: '2023-10-13',
+      image: '',
+      $createdAt: '2023-10-13',
+      channel: 'in_store',
+      senderBankId: 'account-2',
+      receiverBankId: '',
+    },
+  ];
+}; 
