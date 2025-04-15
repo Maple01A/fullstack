@@ -93,3 +93,16 @@ export const logoutAccount = async () => {
     return null;
   }
 };
+
+export const signOut = async () => {
+  try {
+    // セッションクッキーをクリア
+    const cookieStore = await cookies();
+    cookieStore.delete("appwrite-session");
+    
+    return true;
+  } catch (error) {
+    console.error("ログアウト中にエラーが発生しました:", error);
+    return false;
+  }
+};

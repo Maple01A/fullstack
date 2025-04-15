@@ -55,7 +55,7 @@ const Home = async ({ searchParams }: SearchParamProps) => {
     .slice(0, 5);
 
   return (
-      <div className="min-h-[calc(100vh-64px)] p-4 flex flex-col">
+    <div className="min-h-[calc(100vh-64px)] p-4 flex flex-col">
         {/* 左側：残高と概要 */}
         <div className='lg:col-span-2 space-y-6'>
           <header className='flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-white p-6 rounded-xl shadow-sm'>
