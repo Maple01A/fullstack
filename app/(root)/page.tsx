@@ -55,8 +55,7 @@ const Home = async ({ searchParams }: SearchParamProps) => {
     .slice(0, 5);
 
   return (
-    <section className='flex flex-col gap-6 p-6 max-w-7xl mx-auto'>
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+      <div className="min-h-[calc(100vh-64px)] p-4 flex flex-col">
         {/* 左側：残高と概要 */}
         <div className='lg:col-span-2 space-y-6'>
           <header className='flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-white p-6 rounded-xl shadow-sm'>
@@ -84,21 +83,6 @@ const Home = async ({ searchParams }: SearchParamProps) => {
         <div className='space-y-6'>
           {/* 口座概要 */}
           <div className='bg-white p-6 rounded-xl shadow-sm'>
-            <h2 className='text-xl font-bold mb-4'>口座概要</h2>
-            <div className='space-y-4'>
-              {accountsData.slice(0, 3).map((account) => (
-                <div key={account.id} className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'>
-                  <div>
-                    <h3 className='font-medium'>{account.name}</h3>
-                    <p className='text-sm text-gray-500'>{account.officialName}</p>
-                  </div>
-                  <p className='font-bold'>¥{account.currentBalance.toLocaleString()}</p>
-                </div>
-              ))}
-              <a href="/my-banks" className='text-blue-600 text-sm flex justify-end hover:underline'>
-                すべての口座を見る
-              </a>
-            </div>
           </div>
           
           {/* 今後の予定 */}
@@ -137,7 +121,6 @@ const Home = async ({ searchParams }: SearchParamProps) => {
           </div>
         </div>
       </div>
-    </section>
   );
 };
 
