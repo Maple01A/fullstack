@@ -196,14 +196,20 @@ export const getTransactionStatus = (date: Date) => {
   return date > twoDaysAgo ? "Processing" : "Success";
 };
 
-export const authFormSchema = (type: string) => z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-  firstName: type === 'sign-in' ? z.string().optional(): z.string().min(3),
-  lastName: type === 'sign-in' ? z.string().optional(): z.string().min(3),
-  address:  type === 'sign-in' ? z.string().optional(): z.string().max(50),
-  city:  type === 'sign-in' ? z.string().optional(): z.string().max(50), 
-  state: type === 'sign-in' ? z.string().optional(): z.string().min(3),
-  postalCode: type === 'sign-in' ? z.string().optional(): z.string().min(7).max(7),
-  dateOfBirth: type === 'sign-in' ? z.string().optional(): z.string().min(3),
-})
+export const authFormSchema = (type: string) => {
+  // サインアップの場合
+  if (type === 'sign-up') {
+    return z.object({
+      firstName: z.string().min(1, "First name is required"),
+      lastName: z.string().min(1, "Last name is required"),
+      email: z.string().email("Invalid email address"),
+      password: z.string().min(6, "Password must be at least 6 characters"),
+    });
+  }
+  
+  // サインインの場合
+  return z.object({
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(1, "Password is required"),
+  });
+};
