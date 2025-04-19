@@ -42,12 +42,10 @@ declare type Account = {
   id: string;
   availableBalance: number;
   currentBalance: number;
-  officialName: string;
   mask: string;
   institutionId: string;
   name: string;
   type: string;
-  subtype: string;
   appwriteItemId: string;
   sharableId: string;
 };
@@ -332,39 +330,55 @@ declare interface BankCardProps {
   showActions?: boolean;
 }
 
-export type Account = {
-  id: string;
-  type: string;
-  currentBalance: number;
-  appwriteItemId: string;
-};
-
-export type SignInFormValues = {
-  email: string;
-  password: string;
-};
-
 export interface Account {
-  appwriteItemId: string; // Supabase UUIDだが互換性のために名前維持
+  appwriteItemId: string;
   name: string;
-  officialName: string;
-  type: string;
-  subtype?: string;
+  type: 'depository' | 'credit' | 'paypay' | 'paidy' | 'other';
   mask?: string;
   accountNumber?: string;
   currentBalance: number;
   icon?: string | null;
 }
 
-// トランザクション型定義（オプション）
-export interface Transaction {
-  id: string;
-  accountId: string;
-  name: string;
-  amount: number;
-  date: string;
-  category?: string;
+export interface AccountsResponse {
+  data: Account[];
+  totalCurrentBalance: number;
+  error: string | null;
 }
+
+export interface AccountResponse {
+  data: Account | null;
+  error: string | null;
+}
+
+export interface AddAccountResponse {
+  success: boolean;
+  data?: { id: string };
+  error: string | null;
+}
+
+export interface DeleteAccountResponse {
+  success: boolean;
+  error: string | null;
+}
+
+export interface ServerUser {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
+
+export interface UserSession {
+  user: ServerUser | null;
+  isLoading: boolean;
+  error: string | null;
+}
+
+export type SignInFormValues = {
+  email: string;
+  password: string;
+};
 
 export interface signUpParams {
   email: string;

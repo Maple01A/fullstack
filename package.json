@@ -27,6 +27,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dwolla-v2": "^3.4.0",
+    "firebase": "^11.6.0",
     "firebase-admin": "^13.2.0",
     "framer-motion": "^12.7.3",
     "lucide-react": "^0.475.0",

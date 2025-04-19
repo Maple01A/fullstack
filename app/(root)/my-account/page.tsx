@@ -18,17 +18,17 @@ const MyAccounts = async () => {
     if (!user) {
       return redirect('/sign-in');
     }
-    
+
     // ログイン済みユーザーの口座情報を取得
     const accounts = await getAccounts({ userId: user.id });
-    
+
     // データがないか、エラーがある場合
     if (!accounts || accounts.error) {
       // 口座一覧を0件で初期化
-      return renderAccountsPage(user, { 
-        data: [], 
-        totalCurrentBalance: 0, 
-        error: accounts?.error || null 
+      return renderAccountsPage(user, {
+        data: [],
+        totalCurrentBalance: 0,
+        error: accounts?.error || null
       });
     }
 
@@ -52,103 +52,106 @@ function renderAccountsPage(user: any, accounts: { data: Account[], totalCurrent
     !['depository', 'credit', 'paypay', 'paidy'].includes(acc.type)
   );
 
-  // ユーザー名の整形
   const userName = user ? (
     user.firstName && user.lastName
-      ? `${user.firstName} ${user.lastName}` 
+      ? `${user.firstName} ${user.lastName}`
       : (user.firstName || user.email?.split('@')[0] || 'ゲスト')
   ) : 'ゲスト';
 
   return (
-    <div className="min-h-[calc(100vh-64px)] p-4 flex flex-col">
-      <div className="flex justify-between items-center mb-3">
-        <HeaderBox
-          type='greeting'
-          title='こんにちは'
-          user={user?.firstName || 'ゲスト'}
-          subtext='口座・クレジットカード・電子決済の一覧'
-        />
-      </div>
-      
-      <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 w-auto">
-        <div className="flex flex-col sm:flex-row items-center gap-4 flex-grow">
-          <div className="py-3 px-5 rounded-lg shadow-md w-full sm:w-auto">
-            <p className="text-sm">合計残高</p>
-            <p className="text-2xl font-bold">¥{accounts.totalCurrentBalance.toLocaleString()}</p>
+    <section className='home'>
+      <div className='home-content'>
+        <header className='home-header'>
+          <HeaderBox
+            type='greeting'
+            title='こんにちは'
+            user={user?.firstName || 'ゲスト'}
+            subtext='口座・クレジットカード・電子決済の一覧'
+          />
+        </header>
+
+        <div className="mt-8 mb-8">
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-auto">
+            <div className="flex flex-col sm:flex-row items-center gap-4 flex-grow">
+              <div className="py-3 px-5 rounded-lg shadow-md w-full sm:w-auto bg-white">
+                <p className="text-sm text-gray-500">合計残高</p>
+                <p className="text-2xl font-bold text-blue-700">¥{accounts.totalCurrentBalance.toLocaleString()}</p>
+              </div>
+            </div>
+            <Link href="/my-account/add">
+              <Button className="flex items-center gap-2 shadow-md w-full sm:w-auto px-5 py-6 ml-auto">
+                <Plus size={18} />
+                <span className="font-medium">新規口座を追加</span>
+              </Button>
+            </Link>
           </div>
         </div>
-        <Link href="/my-account/add">
-          <Button className="flex items-center gap-2 shadow-md w-full sm:w-auto px-5 py-6 ml-auto">
-            <Plus size={18} />
-            <span className="font-medium">新規口座を追加</span>
-          </Button>
-        </Link>
-      </div>
-      
-      {accounts.data.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-          <div className="mx-auto w-16 h-16 bg-blue-50 flex items-center justify-center rounded-full mb-4">
-            <Building size={28} className="text-blue-600" />
+
+        {accounts.data.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-sm p-12 text-center mt-6">
+            <div className="mx-auto w-16 h-16 bg-blue-50 flex items-center justify-center rounded-full mb-4">
+              <Building size={28} className="text-blue-600" />
+            </div>
+            <h3 className="text-xl font-medium text-gray-800 mb-2">登録口座はありません</h3>
+            <p className="text-gray-500 mb-6 max-w-md mx-auto">
+              「新規口座を追加」ボタンからあなたの銀行口座、クレジットカード、電子決済などを登録して管理を始めましょう
+            </p>
           </div>
-          <h3 className="text-xl font-medium text-gray-800 mb-2">登録口座はありません</h3>
-          <p className="text-gray-500 mb-6 max-w-md mx-auto">
-            「新規口座を追加」ボタンからあなたの銀行口座、クレジットカード、電子決済などを登録して管理を始めましょう
-          </p>
-        </div>
-      ) : (
-        <div className='space-y-8'>
-          {/* 普通預金口座 */}
-          {depositoryAccounts.length > 0 && (
-            <AccountSection
-              title="普通預金口座"
-              icon={<Building size={20} />}
-              accounts={depositoryAccounts}
-              userName={userName}
-            />
-          )}
+        ) : (
+          <div className='space-y-8'>
+            {/* 普通預金口座 */}
+            {depositoryAccounts.length > 0 && (
+              <AccountSection
+                title="普通預金口座"
+                icon={<CreditCard size={20} />}
+                accounts={depositoryAccounts}
+                userName={userName}
+              />
+            )}
 
-          {/* クレジットカード */}
-          {creditAccounts.length > 0 && (
-            <AccountSection
-              title="クレジットカード"
-              icon={<CreditCard size={20} />}
-              accounts={creditAccounts}
-              userName={userName}
-            />
-          )}
+            {/* クレジットカード */}
+            {creditAccounts.length > 0 && (
+              <AccountSection
+                title="クレジットカード"
+                icon={<CreditCard size={20} />}
+                accounts={creditAccounts}
+                userName={userName}
+              />
+            )}
 
-          {/* PayPay口座 */}
-          {paypayAccounts.length > 0 && (
-            <AccountSection
-              title="PayPay口座"
-              icon={<Wallet size={20} />}
-              accounts={paypayAccounts}
-              userName={userName}
-            />
-          )}
+            {/* PayPay口座 */}
+            {paypayAccounts.length > 0 && (
+              <AccountSection
+                title="PayPay"
+                icon={<Wallet size={20} />}
+                accounts={paypayAccounts}
+                userName={userName}
+              />
+            )}
 
-          {/* Paidy口座 */}
-          {paidyAccounts.length > 0 && (
-            <AccountSection
-              title="Paidy口座"
-              icon={<Wallet size={20} />}
-              accounts={paidyAccounts}
-              userName={userName}
-            />
-          )}
+            {/* Paidy口座 */}
+            {paidyAccounts.length > 0 && (
+              <AccountSection
+                title="Paidy"
+                icon={<Wallet size={20} />}
+                accounts={paidyAccounts}
+                userName={userName}
+              />
+            )}
 
-          {/* その他の口座 */}
-          {otherAccounts.length > 0 && (
-            <AccountSection
-              title="その他の口座"
-              icon={<Landmark size={20} />}
-              accounts={otherAccounts}
-              userName={userName}
-            />
-          )}
-        </div>
-      )}
-    </div>
+            {/* その他の口座 */}
+            {otherAccounts.length > 0 && (
+              <AccountSection
+                title="その他の口座"
+                icon={<Landmark size={20} />}
+                accounts={otherAccounts}
+                userName={userName}
+              />
+            )}
+          </div>
+        )}
+      </div>
+    </section>
   );
 };
 

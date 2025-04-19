@@ -1,22 +1,70 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { MoreHorizontal, Edit, Trash2, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
-import { formatAmount } from '@/lib/utils';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '../ui/DropdownMenu';
-import { Button } from '../ui/Button';
 import Image from 'next/image';
-import { Account } from '@/types';
+import { useRouter } from 'next/navigation';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './DropdownMenu';
+import { Button } from './Button';
+import { MoreHorizontal, Edit, Trash2, ExternalLink } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
+
+// 口座タイプに応じたグラデーション背景の取得
+const getCardGradient = (type: string): string => {
+  switch (type) {
+    case 'depository':
+      return 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200';
+    case 'credit':
+      return 'bg-gradient-to-r from-yellow-50 to-orange-100 border-orange-200';
+    case 'paypay':
+      return 'bg-gradient-to-r from-red-50 to-red-100 border-red-200';
+    case 'paidy':
+      return 'bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200';
+    default:
+      return 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200';
+  }
+};
+
+// 口座タイプに応じたアイコン色の取得
+const getIconBackground = (type: string): string => {
+  switch (type) {
+    case 'depository':
+      return 'bg-blue-100';
+    case 'credit':
+      return 'bg-orange-100';
+    case 'paypay':
+      return 'bg-red-100';
+    case 'paidy':
+      return 'bg-purple-100';
+    default:
+      return 'bg-gray-100';
+  }
+};
+
+// 銀行口座アイコンの取得
+const getIconForAccountType = (type: string): string => {
+  switch (type) {
+    case 'depository':
+      return '/icons/credit-card.svg';
+    case 'credit':
+      return '/icons/credit-card.svg';
+    case 'paypay':
+      return '/icons/paypay.svg';
+    case 'paidy':
+      return '/icons/paidy.svg';
+    default:
+      return '/icons/wallet.svg';
+  }
+};
 
 interface BankCardProps {
-  account: Account;
+  account: {
+    appwriteItemId: string;
+    name: string;
+    type: string;
+    currentBalance: number;
+    icon?: string | null;
+    mask?: string;
+  };
   userName: string;
   showBalance?: boolean;
   showActions?: boolean;
@@ -26,15 +74,6 @@ const BankCard = ({ account, userName, showBalance = true, showActions = true }:
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // 銀行口座アイコンの取得
-  const getIconForAccountType = (type: string, subtype?: string) => {
-    if (type === 'depository') return '/icons/bank.svg';
-    if (type === 'credit') return '/icons/credit-card.svg';
-    if (type === 'paypay') return '/icons/paypay.svg';
-    if (type === 'paidy') return '/icons/paidy.svg';
-    return '/icons/wallet.svg';
-  };
 
   // 口座削除処理
   const handleDelete = async () => {
@@ -79,22 +118,26 @@ const BankCard = ({ account, userName, showBalance = true, showActions = true }:
     router.push(`/my-account/${account.appwriteItemId}`);
   };
 
+  // アイコンのソースを適切に設定（空の文字列を回避）
+  const iconSrc = account.icon || getIconForAccountType(account.type);
+
   return (
-    <div className="relative bg-white rounded-xl border border-gray-100 p-4 flex flex-col shadow-sm hover:shadow-md transition-all duration-200">
+    <div className={`relative rounded-xl border p-4 flex flex-col shadow-sm hover:shadow-md transition-all duration-200 ${getCardGradient(account.type)}`}>
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
-          <div className="flex-shrink-0 w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
+          <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getIconBackground(account.type)}`}>
+            {/* 空の文字列を回避し、デフォルトアイコンを使用 */}
             <Image 
-              src={account.icon || getIconForAccountType(account.type, account.subtype)}
-              alt={account.type}
+              src={iconSrc}
+              alt={account.name || account.type}
               width={20}
               height={20}
               className="object-contain"
             />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">{account.name}</h3>
-            <p className="text-xs text-gray-500">{account.mask ? `****${account.mask}` : account.officialName}</p>
+            <h3 className="font-semibold text-gray-800">{account.name}</h3>
+            {account.mask && <p className="text-xs text-gray-500">****{account.mask}</p>}
           </div>
         </div>
 
@@ -105,7 +148,7 @@ const BankCard = ({ account, userName, showBalance = true, showActions = true }:
                 <MoreHorizontal size={18} className="text-gray-500" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-[150px]">
+            <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={handleView} className="cursor-pointer">
                 <ExternalLink size={16} className="mr-2" />
                 <span>詳細を見る</span>
@@ -114,10 +157,9 @@ const BankCard = ({ account, userName, showBalance = true, showActions = true }:
                 <Edit size={16} className="mr-2" />
                 <span>編集</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem 
                 onClick={handleDelete} 
-                className="cursor-pointer text-red-600 focus:text-red-600"
+                className="cursor-pointer text-red-600"
                 disabled={isDeleting}
               >
                 <Trash2 size={16} className="mr-2" />
@@ -131,8 +173,8 @@ const BankCard = ({ account, userName, showBalance = true, showActions = true }:
       {showBalance && (
         <div className="mt-2">
           <p className="text-sm text-gray-500">残高</p>
-          <p className="text-lg font-bold">
-            ¥{account.currentBalance.toLocaleString()}
+          <p className={`text-lg font-bold ${account.currentBalance < 0 ? 'text-red-600' : 'text-gray-800'}`}>
+            {formatCurrency(account.currentBalance)}
           </p>
         </div>
       )}

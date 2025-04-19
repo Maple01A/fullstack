@@ -4,78 +4,49 @@ import qs from "query-string";
 import { twMerge } from "tailwind-merge";
 import { z } from "zod";
 
+/**
+ * クラス名を結合するユーティリティ関数
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// FORMAT DATE TIME
+/**
+ * 日時フォーマット関連の関数
+ */
 export const formatDateTime = (dateString: Date) => {
   const dateTimeOptions: Intl.DateTimeFormatOptions = {
-    weekday: "short", // abbreviated weekday name (e.g., 'Mon')
-    month: "short", // abbreviated month name (e.g., 'Oct')
-    day: "numeric", // numeric day of the month (e.g., '25')
-    hour: "numeric", // numeric hour (e.g., '8')
-    minute: "numeric", // numeric minute (e.g., '30')
-    hour12: true, // use 12-hour clock (true) or 24-hour clock (false)
+    weekday: "short",
+    month: "short", 
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
   };
-
-  const dateDayOptions: Intl.DateTimeFormatOptions = {
-    weekday: "short", // abbreviated weekday name (e.g., 'Mon')
-    year: "numeric", // numeric year (e.g., '2023')
-    month: "2-digit", // abbreviated month name (e.g., 'Oct')
-    day: "2-digit", // numeric day of the month (e.g., '25')
-  };
-
-  const dateOptions: Intl.DateTimeFormatOptions = {
-    month: "short", // abbreviated month name (e.g., 'Oct')
-    year: "numeric", // numeric year (e.g., '2023')
-    day: "numeric", // numeric day of the month (e.g., '25')
-  };
-
-  const timeOptions: Intl.DateTimeFormatOptions = {
-    hour: "numeric", // numeric hour (e.g., '8')
-    minute: "numeric", // numeric minute (e.g., '30')
-    hour12: true, // use 12-hour clock (true) or 24-hour clock (false)
-  };
-
-  const formattedDateTime: string = new Date(dateString).toLocaleString(
-    "en-US",
-    dateTimeOptions
-  );
-
-  const formattedDateDay: string = new Date(dateString).toLocaleString(
-    "en-US",
-    dateDayOptions
-  );
-
-  const formattedDate: string = new Date(dateString).toLocaleString(
-    "en-US",
-    dateOptions
-  );
-
-  const formattedTime: string = new Date(dateString).toLocaleString(
-    "en-US",
-    timeOptions
-  );
-
-  return {
-    dateTime: formattedDateTime,
-    dateDay: formattedDateDay,
-    dateOnly: formattedDate,
-    timeOnly: formattedTime,
-  };
+  
+  return new Intl.DateTimeFormat('ja-JP', dateTimeOptions).format(dateString);
 };
 
-export function formatAmount(amount: number): string {
-  const formatter = new Intl.NumberFormat("ja-JP", {
-    style: "currency",
-    currency: "JPY",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  });
+export const formatDateOnly = (dateString: Date) => {
+  const dateOptions: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  };
+  
+  return new Intl.DateTimeFormat('ja-JP', dateOptions).format(dateString);
+};
 
-  return formatter.format(amount);
-}
+/**
+ * 数値フォーマット関連の関数
+ */
+export const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('ja-JP', {
+    style: 'currency',
+    currency: 'JPY',
+    minimumFractionDigits: 0,
+  }).format(amount);
+};
 
 export const parseStringify = (value: any) => JSON.parse(JSON.stringify(value));
 
@@ -188,6 +159,9 @@ export function decryptId(id: string) {
   return atob(id);
 }
 
+/**
+ * トランザクション関連のユーティリティ
+ */
 export const getTransactionStatus = (date: Date) => {
   const today = new Date();
   const twoDaysAgo = new Date(today);
@@ -196,20 +170,31 @@ export const getTransactionStatus = (date: Date) => {
   return date > twoDaysAgo ? "Processing" : "Success";
 };
 
+/**
+ * 認証フォームスキーマ
+ */
 export const authFormSchema = (type: string) => {
-  // サインアップの場合
   if (type === 'sign-up') {
     return z.object({
-      firstName: z.string().min(1, "First name is required"),
-      lastName: z.string().min(1, "Last name is required"),
-      email: z.string().email("Invalid email address"),
-      password: z.string().min(6, "Password must be at least 6 characters"),
+      firstName: z.string().min(1, "名前は必須です"),
+      lastName: z.string().min(1, "姓は必須です"),
+      email: z.string().email("有効なメールアドレスを入力してください"),
+      password: z.string().min(6, "パスワードは6文字以上必要です"),
     });
   }
   
-  // サインインの場合
+  // Sign-inのデフォルトスキーマ
   return z.object({
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(1, "Password is required"),
+    email: z.string().email("有効なメールアドレスを入力してください"),
+    password: z.string().min(1, "パスワードを入力してください"),
   });
+};
+
+/**
+ * デバッグ用のロギング関数（本番環境では無効）
+ */
+export const debugLog = (...args: any[]) => {
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(...args);
+  }
 };

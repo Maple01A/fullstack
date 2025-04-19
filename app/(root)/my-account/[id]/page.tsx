@@ -2,7 +2,7 @@ import BankCard from '@/components/ui/BankCard';
 import { Button } from '@/components/ui/Button';
 import { getAccount } from '@/lib/actions/bank.actions';
 import { getServerUser } from '@/lib/actions/user.server.actions';
-import { formatAmount } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 import { ArrowLeft, Edit, CreditCard, Calendar, Tag, ArrowDownCircle, ArrowUpCircle, Wallet, CreditCard as CreditCardIcon } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -20,7 +20,7 @@ const BankDetailsPage = async ({ params }: BankDetailsPageProps) => {
     return redirect('/sign-in');
   }
 
-  const accountData = await getAccount({ appwriteItemId: params.id });
+  const accountData = await getAccount(params.id);
 
   if (!accountData || !accountData.data) {
     return redirect('/my-account');
@@ -56,7 +56,7 @@ const BankDetailsPage = async ({ params }: BankDetailsPageProps) => {
             <div className="bg-white rounded-xl shadow-md p-6 mb-4">
               <BankCard
                 account={account}
-                userName={`${loggedIn.firstName} ${loggedIn.lastName}`}
+                userName={`${loggedIn.firstName || ''} ${loggedIn.lastName || ''}`}
                 showBalance={true}
                 showActions={false}
               />
@@ -86,12 +86,8 @@ const BankDetailsPage = async ({ params }: BankDetailsPageProps) => {
                     <dd className="font-medium">{account.name}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm text-gray-500 mb-1">口座名</dt>
-                    <dd className="font-medium">{account.officialName}</dd>
-                  </div>
-                  <div>
                     <dt className="text-sm text-gray-500 mb-1">口座番号下4桁</dt>
-                    <dd className="font-medium">{account.mask}</dd>
+                    <dd className="font-medium">{account.mask || '-'}</dd>
                   </div>
                   <div>
                     <dt className="text-sm text-gray-500 mb-1">口座タイプ</dt>
@@ -110,17 +106,10 @@ const BankDetailsPage = async ({ params }: BankDetailsPageProps) => {
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-sm text-gray-500 mb-1">サブタイプ</dt>
-                    <dd className="font-medium">{account.subtype === 'checking' ? '普通預金' :
-                      account.subtype === 'savings' ? '定期預金' :
-                      account.subtype === 'credit_card' ? 'クレジットカード' :
-                      account.subtype === 'mortgage' ? '住宅ローン' : account.subtype}</dd>
-                  </div>
-                  <div>
                     <dt className="text-sm text-gray-500 mb-1">残高</dt>
                     <dd className="font-bold text-xl">
                       <span className={`${account.currentBalance < 0 ? 'text-red-600' : 'text-blue-700'}`}>
-                        {formatAmount(account.currentBalance)}
+                        {formatCurrency(account.currentBalance)}
                       </span>
                     </dd>
                   </div>
@@ -129,7 +118,7 @@ const BankDetailsPage = async ({ params }: BankDetailsPageProps) => {
             </div>
 
             {/* 最近の取引セクション */}
-            {transactions.length > 0 ? (
+            {transactions && transactions.length > 0 ? (
               <div className="bg-white rounded-xl shadow-md overflow-hidden">
                 <div className="border-b border-gray-100 px-6 py-4">
                   <h2 className="text-xl font-bold flex items-center gap-2">
@@ -155,7 +144,7 @@ const BankDetailsPage = async ({ params }: BankDetailsPageProps) => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                               <Tag size={12} className="mr-1" />
-                              {transaction.category}
+                              {transaction.category || '未分類'}
                             </span>
                           </td>
                           <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium ${
@@ -166,7 +155,7 @@ const BankDetailsPage = async ({ params }: BankDetailsPageProps) => {
                                 ? <ArrowUpCircle size={14} className="mr-1 opacity-80" /> 
                                 : <ArrowDownCircle size={14} className="mr-1 opacity-80" />
                               }
-                              {formatAmount(Math.abs(transaction.amount))}
+                              {formatCurrency(Math.abs(transaction.amount))}
                             </span>
                           </td>
                         </tr>

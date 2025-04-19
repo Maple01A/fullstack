@@ -1,5 +1,4 @@
 import AddBankForm from '@/components/ui/AddBankForm';
-import HeaderBox from '@/components/ui/HeaderBox';
 import { getServerUser } from '@/lib/actions/user.server.actions';
 import { ArrowLeft, CreditCard, Ban } from 'lucide-react';
 import Link from 'next/link';
@@ -25,7 +24,8 @@ const AddBankPage = async () => {
         <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-4 sm:p-5 rounded-t-xl shadow-sm">
           <div className="flex items-center gap-3">
             <div>
-              <p className="text-blue-100 text-sm">銀行口座やクレジットカード情報を入力してください</p>
+              <h1 className="text-lg font-semibold">口座の追加</h1>
+              <p className="text-blue-100 text-sm">あなたの銀行口座やクレジットカード情報を追加してください</p>
             </div>
           </div>
         </div>
@@ -38,7 +38,7 @@ const AddBankPage = async () => {
             </h2>
           </div>
           
-          {/* ユーザーIDをコンポーネントに渡す */}
+          {/* ここにフォームコンポーネントを追加 - ユーザーIDを渡す */}
           <AddBankForm userId={user.id} />
         </div>
       </div>
