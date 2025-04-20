@@ -18,6 +18,12 @@ const TransactionsTable = ({ transactions, accounts }: TransactionsTableProps) =
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const router = useRouter();
 
+  const sortedTransactions = [...transactions].sort((a, b) => {
+    const dateA = new Date(a.created_at).getTime();
+    const dateB = new Date(b.created_at).getTime();
+    return dateB - dateA; // 降順（最新が先頭）に変更
+  });
+
   // 口座名を取得 - IDの両方の可能性をチェック
   const getAccountName = (accountId: string) => {
     if (!accountId) return '不明な口座';
@@ -161,10 +167,10 @@ const TransactionsTable = ({ transactions, accounts }: TransactionsTableProps) =
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {transactions.map((transaction) => (
+            {sortedTransactions.map((transaction) => (
               <tr key={transaction.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {formatDateShort(new Date(transaction.transaction_date || transaction.created_at))}
+                  {formatDateShort(new Date(transaction.created_at))}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">

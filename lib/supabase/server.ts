@@ -1,6 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
+// データベーステーブル名を定数として定義
+export const DB_TABLES = {
+  BANK_ACCOUNTS: 'bank_accounts',
+  TRANSACTIONS: 'transactions',
+  PLAN_EVENTS: 'plan_events',
+  USERS: 'users'
+};
+
 // Supabaseクライアントを生成する関数
 export const getSupabase = () => {
   // 環境変数からSupabaseのURLとアノンキーを取得
@@ -18,18 +26,10 @@ export const getSupabase = () => {
   return createClient(supabaseUrl, supabaseKey, {
     auth: {
       persistSession: false,
-      // クッキーからセッション情報を復元
-      detectSessionInUrl: false,
-      cookieOptions: {
-        name: 'sb-auth-token',
-        path: '/',
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-      }
+      autoRefreshToken: true
     },
-    // クッキーを使用して認証状態を維持
     cookies: {
-      get(name) {
+      get(name: string) {
         return cookieStore.get(name)?.value;
       }
     }

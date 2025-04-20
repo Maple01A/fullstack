@@ -75,6 +75,10 @@ function renderAccountsPage(user: any, accounts: { data: Account[], totalCurrent
           <div className="flex flex-col sm:flex-row items-center gap-4 w-auto">
             <div className="flex flex-col sm:flex-row items-center gap-4 flex-grow">
               <div className="py-3 px-5 rounded-lg shadow-md w-full sm:w-auto bg-white">
+                <p className="text-sm text-gray-500">登録口座数</p>
+                <p className="text-2xl font-bold text-blue-700">{accounts.data.length}件</p>
+              </div>
+              <div className="py-3 px-5 rounded-lg shadow-md w-full sm:w-auto bg-white">
                 <p className="text-sm text-gray-500">合計残高</p>
                 <p className="text-2xl font-bold text-blue-700">¥{accounts.totalCurrentBalance.toLocaleString()}</p>
               </div>
