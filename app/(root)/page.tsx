@@ -35,9 +35,10 @@ export default function Home() {
   };
 
   const sortedTransactions = [...transactions].sort((a, b) => {
-    const dateA = new Date(a.created_at).getTime();
-    const dateB = new Date(b.created_at).getTime();
-    return dateB - dateA; // 降順（最新が先頭）に変更
+    // transaction_date を優先し、ない場合は created_at を使用
+    const dateA = new Date(a.transaction_date || a.created_at).getTime();
+    const dateB = new Date(b.transaction_date || b.created_at).getTime();
+    return dateB - dateA; // 降順（最新が先頭）
   });
 
   useEffect(() => {
@@ -51,6 +52,7 @@ export default function Home() {
           setAccounts(accountsResponse.data || []);
           setTotalBalance(accountsResponse.totalCurrentBalance || 0);
 
+          // 過去1ヶ月分のデータを取得
           const startDate = format(subMonths(new Date(), 1), 'yyyy-MM-dd');
           const endDate = format(new Date(), 'yyyy-MM-dd');
 
@@ -61,10 +63,17 @@ export default function Home() {
             endDate
           });
 
+          // データ存在確認のログ
+          console.log(`取得した取引数: ${transactionsResponse.data?.length || 0}`);
+          
           setTransactions(transactionsResponse.data || []);
         }
       } catch (error) {
         console.error('データ読み込みエラー:', error);
+        // エラー内容を詳細に記録
+        if (error instanceof Error) {
+          console.error('エラー詳細:', error.message);
+        }
         window.location.href = '/sign-in';
       } finally {
         setLoading(false);
@@ -112,9 +121,6 @@ export default function Home() {
         case 'utilities': category = '光熱費'; break;
         case 'transportation': category = '交通費'; break;
         case 'entertainment': category = '娯楽費'; break;
-        case 'healthcare': category = '医療費'; break;
-        case 'education': category = '教育費'; break;
-        case 'shopping': category = '買い物'; break;
         case 'subscription': category = 'サブスク'; break;
         case 'other_expense': category = '未分類'; break;
       }

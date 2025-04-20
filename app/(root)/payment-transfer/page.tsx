@@ -9,6 +9,7 @@ import { Calendar, Wallet, TrendingUp, TrendingDown, Plus, Check } from 'lucide-
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import PlanButton from '@/components/ui/PlanButton';
+import DeletePlanButton from '@/components/ui/DeletePlanButton';
 
 async function FinancialPlanPage() {
     const loggedIn = await getServerUser();
@@ -50,7 +51,7 @@ async function FinancialPlanPage() {
         events.forEach(event => {
             try {
                 const eventDate = new Date(event.date || '');
-                console.log(`イベント: ${event.title}, 日付: ${event.date}, 今日以降? ${isAfter(eventDate, today) || isSameDay(eventDate, today)}, 完了? ${event.resource?.completed}`);
+                console.log(`イベント: ${event.title}, 日付: ${event.date}, 今日以降? ${isAfter(eventDate, today) || isSameDay(eventDate, today)}, 完了? ${event.completed}`);
             } catch (e) {
                 console.log(`日付解析エラー: ${event.title}, 日付: ${event.date}`);
             }
@@ -63,14 +64,14 @@ async function FinancialPlanPage() {
 
         console.log(`取得した口座数: ${accounts.length}, 総残高: ${totalCurrentBalance}`);
 
-        // 収支計画の合計を計算 - nullチェックを追加
+        // 収支計画の合計を計算 - プロパティアクセスを修正
         const plannedIncome = events
-            .filter(event => event.resource?.type === 'income' && !event.resource?.completed)
-            .reduce((sum, event) => sum + (event.resource?.amount || 0), 0);
+            .filter(event => event.type === 'income' && !event.completed)
+            .reduce((sum, event) => sum + (event.amount || 0), 0);
 
         const plannedExpenses = events
-            .filter(event => event.resource?.type === 'expense' && !event.resource?.completed)
-            .reduce((sum, event) => sum + (event.resource?.amount || 0), 0);
+            .filter(event => event.type === 'expense' && !event.completed)
+            .reduce((sum, event) => sum + (event.amount || 0), 0);
 
         const projectedBalance = totalCurrentBalance + plannedIncome - plannedExpenses;
 
@@ -98,20 +99,44 @@ async function FinancialPlanPage() {
         // 今後の予定のみを抽出（完了していないもの）
         const futureEvents = events
             .filter(event => {
-                // 日付が存在するか確認
-                if (!event.date) return false;
-                
-                // 日付をDate型に変換
-                const eventDate = new Date(event.date);
-                
-                // 現在の日付以降で、まだ完了していないイベントのみフィルタリング
-                return (isAfter(eventDate, today) || isSameDay(eventDate, today)) && !event.resource?.completed;
+                try {
+                    // 日付が存在するか確認
+                    if (!event.date) {
+                        console.log(`日付なしイベント: ${event.title || 'タイトルなし'}`);
+                        return false;
+                    }
+                    
+                    // 日付をDate型に変換
+                    const eventDate = new Date(event.date);
+                    
+                    // 有効な日付かチェック
+                    if (isNaN(eventDate.getTime())) {
+                        console.log(`無効な日付: ${event.date}, イベント: ${event.title || 'タイトルなし'}`);
+                        return false;
+                    }
+                    
+                    // イベントデータの構造をログ
+                    console.log(`イベントデータ: ${JSON.stringify({
+                        id: event.id,
+                        title: event.title,
+                        date: event.date,
+                        type: event.type,
+                        completed: event.completed
+                    })}`);
+                    
+                    // 現在の日付以降で、まだ完了していないイベントのみフィルタリング
+                    const isFutureEvent = (isAfter(eventDate, today) || isSameDay(eventDate, today));
+                    const isNotCompleted = !event.completed;
+                    
+                    return isFutureEvent && isNotCompleted;
+                } catch (error) {
+                    console.error(`イベントフィルタリングエラー: ${error}`);
+                    return false;
+                }
             })
             .sort((a, b) => {
-                // 日付でソート（昇順）
-                const dateA = new Date(a.date || '');
-                const dateB = new Date(b.date || '');
-                return compareAsc(dateA, dateB);
+                // 日付でソート
+                return new Date(a.date).getTime() - new Date(b.date).getTime();
             });
 
         console.log(`今後の予定数: ${futureEvents.length}`);
@@ -201,7 +226,7 @@ async function FinancialPlanPage() {
                                             <span>{format(day, 'd')}</span>
                                             {hasEvents && (
                                                 <div className={`w-1.5 h-1.5 mt-0.5 rounded-full
-                                                    ${eventsByDate[dateKey].some(e => e.resource.type === 'expense') ? 'bg-red-500' : 'bg-green-500'}`}>
+                                                    ${eventsByDate[dateKey].some(e => e.type === 'expense') ? 'bg-red-500' : 'bg-green-500'}`}>
                                                 </div>
                                             )}
                                         </div>
@@ -242,8 +267,8 @@ async function FinancialPlanPage() {
 
                                                 <div className="flex items-start ml-4">
                                                     <div className={`rounded-full p-1 mt-0.5 mr-2 
-                                                        ${event.resource.type === 'income' ? 'bg-green-100' : 'bg-red-100'}`}>
-                                                        {event.resource.type === 'income' ? (
+                                                        ${event.type === 'income' ? 'bg-green-100' : 'bg-red-100'}`}>
+                                                        {event.type === 'income' ? (
                                                             <TrendingUp size={12} className="text-green-600" />
                                                         ) : (
                                                             <TrendingDown size={12} className="text-red-600" />
@@ -254,23 +279,26 @@ async function FinancialPlanPage() {
                                                             <span className="text-sm font-medium">{event.title}</span>
                                                             <div className="flex items-center">
                                                                 <span className={`text-sm font-medium 
-                                                                    ${event.resource.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                                                                    ¥{event.resource.amount.toLocaleString()}
+                                                                    ${event.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                                                                    ¥{event.amount?.toLocaleString() || 0}
                                                                 </span>
+                                                                {/* 確定ボタン */}
                                                                 <PlanButton
                                                                     planId={event.id}
                                                                     title={event.title}
-                                                                    type={event.resource.type}
-                                                                    amount={event.resource.amount}
-                                                                    accountId={event.resource.account_id}
-                                                                    category={event.resource.category}
+                                                                    type={event.type}
+                                                                    amount={event.amount || 0}
+                                                                    accountId={event.account_id}
+                                                                    category={event.category}
                                                                     description={event.description}
                                                                 />
+                                                                {/* 削除ボタン */}
+                                                                <DeletePlanButton planId={event.id} />
                                                             </div>
                                                         </div>
-                                                        {event.description && (
-                                                            <p className="text-xs text-gray-500">{event.description}</p>
-                                                        )}
+                                                        {/* 口座情報を追加 */}
+                                                        <div className="flex justify-between text-xs text-gray-500">
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

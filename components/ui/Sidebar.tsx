@@ -26,7 +26,7 @@ const Sidebar = ({ user }: SiderbarProps) => {
             alt='Logo'
             className='w-8 h-8'
           />
-          <h1 className='sidebar-logo text-xl font-semibold'>Horizon</h1>
+          <h1 className='sidebar-logo text-xl font-semibold'>Balance</h1>
         </Link>
 
         <div className='flex flex-col gap-2'>

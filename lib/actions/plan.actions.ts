@@ -21,56 +21,41 @@ export interface FinancialPlanEvent {
 }
 
 // テーブル名を一定にする
-const TABLE_NAME = 'plan_events';
+const TABLE_NAME = 'events';
 
 // getFinancialPlanEvents関数を修正
 export async function getFinancialPlanEvents({ startDate, endDate }: { startDate?: string, endDate?: string }) {
-  try {
-    const user = await getServerUser();
-    if (!user) {
-      console.log("認証ユーザーがいません");
-      return [];
-    }
+  const user = await getServerUser();
+  if (!user) return [];
 
-    console.log("収支計画イベント取得リクエスト:", `user_id=${user.id}`);
-    const supabase = getSupabase();
-    
-    // クエリを構築 - TABLE_NAMEを使用
-    let query = supabase
-      .from(TABLE_NAME) // 'financial_plan_events'から'plan_events'に変更
-      .select('*')
-      .eq('user_id', user.id);
-    
-    // 日付範囲指定
-    if (startDate) {
-      query = query.gte('date', startDate);
-    }
-    if (endDate) {
-      query = query.lte('date', endDate);
-    }
-    
-    const { data, error } = await query;
+  const supabase = getSupabase();
 
-    if (error) {
-      console.error("収支計画取得エラー:", error.message);
-      return [];
-    }
+  // デバッグ用：日付フィルターを一時的に無効化
+  let query = supabase
+    .from(TABLE_NAME)
+    .select('*')
+    .eq('user_id', user.id);
 
-    console.log(`取得結果: ${data.length}件`);
-    
-    if (data.length === 0) {
-      console.log("収支計画イベントが見つかりません");
-      return [];
-    }
+  // 日付範囲フィルターを一時的に無効化
+  /*
+  if (startDate) {
+    query = query.gte('date', startDate);
+  }
+  if (endDate) {
+    query = query.lte('date', endDate);
+  }
+  */
 
-    // データの構造をログ出力
-    console.log("取得データの最初の要素:", JSON.stringify(data[0], null, 2));
+  const { data, error } = await query;
+  
 
-    return data;
-  } catch (error: any) {
-    console.error("収支計画取得中に例外が発生:", error.message);
+  // SQLの実行でエラーがあった場合は空配列を返す
+  if (error) {
+    console.error("収支計画取得エラー:", error.message);
     return [];
   }
+
+  return data || [];
 }
 
 // 収支計画イベントの追加
@@ -323,7 +308,7 @@ export async function completeFinancialPlanEvent(id: string) {
     
     // 該当イベントを取得して所有者確認 - TABLE_NAMEを使用
     const { data: event, error: fetchError } = await supabase
-      .from(TABLE_NAME) // 'financial_plan_events'から'plan_events'に変更
+      .from(TABLE_NAME)
       .select('*')
       .eq('id', id)
       .eq('user_id', user.id)
@@ -339,7 +324,7 @@ export async function completeFinancialPlanEvent(id: string) {
     
     // 完了マークを付ける - TABLE_NAMEを使用
     const { error } = await supabase
-      .from(TABLE_NAME) // 'financial_plan_events'から'plan_events'に変更
+      .from(TABLE_NAME)
       .update({ 
         completed: true,
         updated_at: new Date().toISOString() 

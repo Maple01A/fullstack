@@ -3,10 +3,9 @@
 import { useState } from 'react';
 import { Check, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { completeFinancialPlanEvent } from '@/lib/actions/plan.actions';
-import { addTransaction } from '@/lib/actions/transaction.actions';
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
-interface PlanButtonProps {
+interface ConfirmPlanButtonProps {
   planId: string;
   title: string;
   type: 'income' | 'expense';
@@ -16,7 +15,7 @@ interface PlanButtonProps {
   description?: string;
 }
 
-export default function PlanButton({ 
+export default function ConfirmPlanButton({ 
   planId,
   title,
   type,
@@ -24,9 +23,10 @@ export default function PlanButton({
   accountId,
   category,
   description
-}: PlanButtonProps) {
+}: ConfirmPlanButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const supabase = createClientComponentClient();
 
   const handleConfirm = async () => {
     if (isLoading) return;
@@ -40,31 +40,100 @@ export default function PlanButton({
         return;
       }
 
-      // 1. 取引を作成
-      const transactionResult = await addTransaction({
-        title,
-        amount,
-        type,
-        accountId,
-        category: category || null,
-        description: description || null
-      });
-
-      if (!transactionResult.success) {
-        throw new Error(`取引の作成に失敗しました: ${transactionResult.error}`);
-      }
-
-      // 2. 収支計画を完了としてマーク
-      const planResult = await completeFinancialPlanEvent(planId);
+      // セッションからユーザーIDを取得
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
-      if (!planResult.success) {
-        throw new Error(`収支計画の更新に失敗しました: ${planResult.error}`);
+      // セッションエラー処理を追加
+      if (sessionError) {
+        console.error("セッション取得エラー:", sessionError);
+        throw new Error("認証セッションの取得に失敗しました");
+      }
+      
+      if (!sessionData?.session?.user) {
+        console.error("セッションからユーザーIDを取得できません");
+        // ユーザーに再ログインを促す
+        alert("セッションが切れています。再度ログインしてください。");
+        router.push('/sign-in');
+        return;
+      }
+      
+      const userId = sessionData.session.user.id;
+      console.log("確定処理 - 認証ユーザーID:", userId);
+
+      // 1. 取引を作成
+      const { data: transactionResult, error: transactionError } = await supabase
+        .from('transactions')
+        .insert({
+          title: title,
+          amount: Math.abs(Number(amount)),
+          type: type,
+          user_id: userId,
+          account_id: accountId,
+          category: category || null,
+          description: description || null,
+          transaction_date: new Date().toISOString(),
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (transactionError) {
+        console.error("取引作成エラー:", transactionError);
+        throw new Error(`取引の作成に失敗しました: ${transactionError.message}`);
       }
 
-      // 3. キャッシュを更新
+      // 2. 口座残高の更新
+      // 口座情報を取得
+      const { data: account, error: accountError } = await supabase
+        .from('bank_accounts')
+        .select('current_balance')
+        .eq('id', accountId)
+        .single();
+        
+      if (accountError) {
+        console.error("口座情報取得エラー:", accountError);
+        throw new Error(`口座情報の取得に失敗しました: ${accountError.message}`);
+      }
+      
+      // 残高更新
+      let newBalance = account.current_balance;
+      if (type === 'income') {
+        newBalance += Math.abs(Number(amount));
+      } else {
+        newBalance -= Math.abs(Number(amount));
+      }
+      
+      const { error: updateError } = await supabase
+        .from('bank_accounts')
+        .update({ 
+          current_balance: newBalance,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', accountId);
+        
+      if (updateError) {
+        console.error("口座残高更新エラー:", updateError);
+        throw new Error(`口座残高の更新に失敗しました: ${updateError.message}`);
+      }
+      
+      // 3. 収支計画を完了としてマーク - テーブル名を修正（events）
+      const { error: planError } = await supabase
+        .from('events')
+        .delete()  // update()からdelete()に変更
+        .eq('id', planId);
+
+      if (planError) {
+        console.error("収支計画削除エラー:", planError);
+        throw new Error(`収支計画の削除に失敗しました: ${planError.message}`);
+      }
+
+      // 成功メッセージ
+      alert('取引を確定しました。取引履歴に移動します。');
+
+      // 4. キャッシュを更新
       router.refresh();
       
-      // 4. 取引履歴ページに移動
+      // 5. 取引履歴ページに移動
       router.push('/transaction-history');
       
     } catch (error) {

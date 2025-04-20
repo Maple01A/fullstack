@@ -43,7 +43,7 @@ const MobileNavbar = ({ user }: MobileNavProps) => {
                 height={34}
                 alt='Logo'
               />
-              <h1 className='text-26 font-ibm-plex-serif font-bold text-black-1'>Horizon</h1>
+              <h1 className='text-26 font-ibm-plex-serif font-bold text-black-1'>Balance</h1>
             </Link>
             <div className='mobilenav-sheet'>
               <SheetClose asChild>

@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 export const DB_TABLES = {
   BANK_ACCOUNTS: 'bank_accounts',
   TRANSACTIONS: 'transactions',
-  PLAN_EVENTS: 'plan_events',
+  EVENTS: 'events',
   USERS: 'users'
 };
 

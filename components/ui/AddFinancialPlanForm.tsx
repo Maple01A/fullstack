@@ -23,7 +23,7 @@ const formSchema = z.object({
   }),
   type: z.enum(['income', 'expense']),
   date: z.string().min(1, '日付は必須です'),
-  accountId: z.string().optional(),
+  accountId: z.string().min(1, '口座選択は必須です'), // 空文字列を許可しないように修正
   category: z.string().optional(),
   description: z.string().max(500, 'メモは500文字以内で入力してください').optional(),
 });
@@ -94,9 +94,9 @@ const AddFinancialPlanForm = ({
       // デバッグ用にユーザー情報をログ
       console.log('現在のユーザー情報:', session.user);
       
-      // データの準備
+      // planEventDataの準備部分を修正
       const planEventData = {
-        user_id: session.user.id, // 重要: ユーザーIDを明示的に設定
+        user_id: session.user.id,  // ユーザーIDを明示的に追加
         title: values.title,
         description: values.description || '',
         date: `${values.date}T00:00:00.000Z`,
@@ -104,16 +104,14 @@ const AddFinancialPlanForm = ({
         amount: Number(values.amount),
         account_id: values.accountId || null,
         category: values.category || null,
-        completed: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        completed: false
       };
       
       console.log('送信するデータ:', planEventData);
       
       // クライアントから直接Supabaseにデータ挿入
       const { error, data } = await supabase
-        .from('plan_events')
+        .from('events')
         .insert([planEventData])
         .select();
         
@@ -264,7 +262,7 @@ const AddFinancialPlanForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">
-                      {watchTransactionType === 'income' ? '入金口座' : '出金口座'}
+                      {watchTransactionType === 'income' ? '入金口座' : '出金口座'} <span className="text-red-500">*</span>
                     </FormLabel>
                     <FormControl>
                       <select
@@ -272,7 +270,7 @@ const AddFinancialPlanForm = ({
                         onChange={(e) => field.onChange(e.target.value)}
                         value={field.value || ""}
                       >
-                        <option value="">選択（任意）</option>
+                        <option value="">口座を選択してください</option>
                         {accounts.length > 0 ? (
                           accounts.map(account => (
                             <option key={account.appwriteItemId} value={account.appwriteItemId}>
@@ -348,3 +346,62 @@ const AddFinancialPlanForm = ({
 };
 
 export default AddFinancialPlanForm;
+
+// filepath: [plan.actions.ts](http://_vscodecontentref_/0)
+export async function getFinancialPlanEvents({ startDate, endDate }: { startDate?: string, endDate?: string }) {
+  try {
+    const user = await getServerUser();
+    if (!user) {
+      console.log("認証ユーザーがいません");
+      return [];
+    }
+
+    console.log("収支計画イベント取得リクエスト - ユーザーID:", user.id);
+    const supabase = getSupabase();
+    
+    // テーブル名を明示的に指定 (TABLE_NAMEは使わない)
+    let query = supabase
+      .from('events')  // 実際のテーブル名を直接指定
+      .select('*')
+      .eq('user_id', user.id);
+    
+    // 日付範囲指定
+    if (startDate) {
+      query = query.gte('date', startDate);
+    }
+    if (endDate) {
+      query = query.lte('date', endDate);
+    }
+    
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("収支計画取得エラー:", error.message);
+      return [];
+    }
+
+    console.log(`取得結果: ${data?.length || 0}件`);
+    
+    // データ構造を確認
+    if (data && data.length > 0) {
+      console.log("取得したデータ最初の要素:", JSON.stringify(data[0]));
+    } else {
+      console.log("取得したイベントはありません");
+      
+      // デバッグ: テーブル内のすべてのデータを取得
+      const { data: allData } = await supabase
+        .from('events')
+        .select('*');
+      
+      console.log(`テーブル内の全データ件数: ${allData?.length || 0}`);
+      if (allData && allData.length > 0) {
+        console.log("テーブル内の最初のデータ:", JSON.stringify(allData[0]));
+      }
+    }
+
+    return data || [];
+  } catch (error: any) {
+    console.error("収支計画取得中に例外が発生:", error.message);
+    return [];
+  }
+}

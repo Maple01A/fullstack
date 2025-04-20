@@ -2,7 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Horizon App',
+  title: 'Balance App',
   description: 'A fullstack app using Next.js and TypeScript',
 };
 

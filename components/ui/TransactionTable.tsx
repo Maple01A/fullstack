@@ -19,8 +19,9 @@ const TransactionsTable = ({ transactions, accounts }: TransactionsTableProps) =
   const router = useRouter();
 
   const sortedTransactions = [...transactions].sort((a, b) => {
-    const dateA = new Date(a.created_at).getTime();
-    const dateB = new Date(b.created_at).getTime();
+    // transaction_dateを優先的に使用
+    const dateA = new Date(a.transaction_date || a.created_at).getTime();
+    const dateB = new Date(b.transaction_date || b.created_at).getTime();
     return dateB - dateA; // 降順（最新が先頭）に変更
   });
 
@@ -170,7 +171,7 @@ const TransactionsTable = ({ transactions, accounts }: TransactionsTableProps) =
             {sortedTransactions.map((transaction) => (
               <tr key={transaction.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {formatDateShort(new Date(transaction.created_at))}
+                  {formatDateShort(new Date(transaction.transaction_date || transaction.created_at))}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
