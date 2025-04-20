@@ -1,7 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createServerComponentClient, createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { revalidatePath } from 'next/cache';
 import { startOfDay, endOfDay } from 'date-fns';
 import { getServerUser } from './user.server.actions';
@@ -313,117 +313,163 @@ export async function addTransaction(data: TransactionData) {
 // 取引削除関数
 export async function deleteTransaction(id: string) {
   try {
-    // ユーザー認証確認
-    const user = await getServerUser();
+    const supabase = createRouteHandlerClient({ cookies });
     
-    if (!user) {
-      return {
-        success: false,
-        error: "認証エラーが発生しました"
-      };
-    }
-    
-    const supabase = getSupabaseClient();
-    
-    // トランザクション情報を取得
+    // 1. 先に取引の詳細を取得
     const { data: transaction, error: fetchError } = await supabase
       .from('transactions')
       .select('*')
       .eq('id', id)
-      .eq('user_id', user.id)
       .single();
     
     if (fetchError || !transaction) {
-      return {
-        success: false,
-        error: "指定された取引が見つかりません"
-      };
+      console.error('取引情報の取得に失敗しました:', fetchError?.message);
+      return { success: false, error: '取引情報の取得に失敗しました' };
     }
     
-    // トランザクション削除前に口座残高を元に戻す処理
-    // 支出：残高を増やす
-    // 収入：残高を減らす
-    // 振替：出金元増やし、入金先減らす
+    console.log('削除する取引:', transaction);
+    
+    // 2. 取引タイプに基づいて残高を調整
     if (transaction.type === 'expense') {
-      // 支出を削除するので、残高を増やす
-      await supabase
+      // 支出取引を削除する場合は、口座残高を増やす（支出を戻す）
+      const { data: account, error: accountError } = await supabase
         .from('bank_accounts')
-        .update({
-          current_balance: supabase.rpc('increment_balance', { 
-            account_id: transaction.account_id, 
-            amount: transaction.amount 
-          }),
-          updated_at: new Date().toISOString()
-        })
+        .select('current_balance')
+        .eq('id', transaction.account_id)
+        .single();
+      
+      if (accountError || !account) {
+        console.error('口座情報の取得に失敗しました:', accountError?.message);
+        return { success: false, error: '口座情報の取得に失敗しました' };
+      }
+      
+      // 残高を増やす（支出分を戻す）
+      const newBalance = account.current_balance + transaction.amount;
+      
+      const { error: updateError } = await supabase
+        .from('bank_accounts')
+        .update({ current_balance: newBalance })
         .eq('id', transaction.account_id);
+      
+      if (updateError) {
+        console.error('残高の更新に失敗しました:', updateError);
+        return { success: false, error: '残高の更新に失敗しました' };
+      }
+      
+      console.log(`支出取引削除: 口座ID ${transaction.account_id} の残高を ${transaction.amount} 増やしました`);
     } 
     else if (transaction.type === 'income') {
-      // 収入を削除するので、残高を減らす
-      await supabase
+      // 収入取引を削除する場合は、口座残高を減らす（収入を取り消す）
+      const { data: account, error: accountError } = await supabase
         .from('bank_accounts')
-        .update({
-          current_balance: supabase.rpc('decrement_balance', { 
-            account_id: transaction.account_id, 
-            amount: transaction.amount 
-          }),
-          updated_at: new Date().toISOString()
-        })
+        .select('current_balance')
+        .eq('id', transaction.account_id)
+        .single();
+      
+      if (accountError || !account) {
+        console.error('口座情報の取得に失敗しました:', accountError?.message);
+        return { success: false, error: '口座情報の取得に失敗しました' };
+      }
+      
+      // 残高を減らす（収入分を戻す）
+      const newBalance = account.current_balance - transaction.amount;
+      
+      const { error: updateError } = await supabase
+        .from('bank_accounts')
+        .update({ current_balance: newBalance })
         .eq('id', transaction.account_id);
-    }
-    else if (transaction.type === 'transfer' && transaction.to_account_id) {
-      // 振替の場合、出金元の残高を増やし、入金先の残高を減らす
-      await supabase
+      
+      if (updateError) {
+        console.error('残高の更新に失敗しました:', updateError);
+        return { success: false, error: '残高の更新に失敗しました' };
+      }
+      
+      console.log(`収入取引削除: 口座ID ${transaction.account_id} の残高を ${transaction.amount} 減らしました`);
+    } 
+    else if (transaction.type === 'transfer') {
+      // 振替取引を削除する場合は、出金元の残高を増やし、振替先の残高を減らす
+      
+      // 出金元の口座を更新
+      const { data: sourceAccount, error: sourceError } = await supabase
         .from('bank_accounts')
-        .update({
-          current_balance: supabase.rpc('increment_balance', { 
-            account_id: transaction.account_id, 
-            amount: transaction.amount 
-          }),
-          updated_at: new Date().toISOString()
-        })
+        .select('current_balance')
+        .eq('id', transaction.account_id)
+        .single();
+      
+      if (sourceError || !sourceAccount) {
+        console.error('出金元口座情報の取得に失敗しました:', sourceError?.message);
+        return { success: false, error: '出金元口座情報の取得に失敗しました' };
+      }
+      
+      // 出金元の残高を増やす（振替分を戻す）
+      const newSourceBalance = sourceAccount.current_balance + transaction.amount;
+      
+      const { error: sourceUpdateError } = await supabase
+        .from('bank_accounts')
+        .update({ current_balance: newSourceBalance })
         .eq('id', transaction.account_id);
-        
-      await supabase
+      
+      if (sourceUpdateError) {
+        console.error('出金元残高の更新に失敗しました:', sourceUpdateError);
+        return { success: false, error: '出金元残高の更新に失敗しました' };
+      }
+      
+      // 振替先の口座を確認 (destination_account_id または to_account_id を使用)
+      const destAccountId = transaction.destination_account_id || transaction.to_account_id;
+      
+      if (!destAccountId) {
+        console.error('振替先口座IDが見つかりません');
+        return { success: false, error: '振替先口座情報が不完全です' };
+      }
+      
+      // 振替先の口座を更新
+      const { data: destAccount, error: destError } = await supabase
         .from('bank_accounts')
-        .update({
-          current_balance: supabase.rpc('decrement_balance', { 
-            account_id: transaction.to_account_id, 
-            amount: transaction.amount 
-          }),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', transaction.to_account_id);
+        .select('current_balance')
+        .eq('id', destAccountId)
+        .single();
+      
+      if (destError || !destAccount) {
+        console.error('振替先口座情報の取得に失敗しました:', destError?.message);
+        return { success: false, error: '振替先口座情報の取得に失敗しました' };
+      }
+      
+      // 振替先の残高を減らす（振替分を戻す）
+      const newDestBalance = destAccount.current_balance - transaction.amount;
+      
+      const { error: destUpdateError } = await supabase
+        .from('bank_accounts')
+        .update({ current_balance: newDestBalance })
+        .eq('id', destAccountId);
+      
+      if (destUpdateError) {
+        console.error('振替先残高の更新に失敗しました:', destUpdateError);
+        return { success: false, error: '振替先残高の更新に失敗しました' };
+      }
+      
+      console.log(`振替取引削除: 口座ID ${transaction.account_id} の残高を ${transaction.amount} 増やし、口座ID ${destAccountId} の残高を ${transaction.amount} 減らしました`);
     }
     
-    // トランザクション削除
+    // 3. 取引を削除
     const { error: deleteError } = await supabase
       .from('transactions')
       .delete()
-      .eq('id', id)
-      .eq('user_id', user.id);
+      .eq('id', id);
     
     if (deleteError) {
-      console.error('トランザクション削除エラー:', deleteError);
-      return {
-        success: false,
-        error: deleteError.message
-      };
+      console.error('取引の削除に失敗しました:', deleteError);
+      return { success: false, error: '取引の削除に失敗しました' };
     }
     
-    // キャッシュ更新
+    // 4. キャッシュを更新して最新情報を表示
     revalidatePath('/transaction-history');
-    revalidatePath('/my-account');
+    revalidatePath('/dashboard');
+    revalidatePath('/accounts');
     
-    return {
-      success: true,
-      error: null
-    };
-  } catch (error: any) {
-    console.error('トランザクション削除エラー:', error);
-    return {
-      success: false,
-      error: error.message || '予期せぬエラーが発生しました'
-    };
+    return { success: true };
+  } catch (error) {
+    console.error('取引削除中の予期せぬエラー:', error);
+    return { success: false, error: '取引の削除中にエラーが発生しました' };
   }
 }
 
@@ -460,23 +506,6 @@ function getTransactionName(category: string, type: string) {
 // 口座残高更新関数
 async function updateAccountBalances(supabase: any, data: TransactionData) {
   try {
-    // 残高更新SQLファンクション作成が必要
-    // CREATE OR REPLACE FUNCTION increment_balance(account_id UUID, amount NUMERIC)
-    // RETURNS NUMERIC AS $$
-    //   UPDATE bank_accounts
-    //   SET current_balance = current_balance + amount
-    //   WHERE id = account_id
-    //   RETURNING current_balance;
-    // $$ LANGUAGE SQL;
-    
-    // CREATE OR REPLACE FUNCTION decrement_balance(account_id UUID, amount NUMERIC)
-    // RETURNS NUMERIC AS $$
-    //   UPDATE bank_accounts
-    //   SET current_balance = current_balance - amount
-    //   WHERE id = account_id
-    //   RETURNING current_balance;
-    // $$ LANGUAGE SQL;
-    
     if (data.type === 'expense') {
       // 支出の場合、残高を減らす
       await supabase
