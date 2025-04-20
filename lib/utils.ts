@@ -37,6 +37,29 @@ export const formatDateOnly = (dateString: Date) => {
   return new Intl.DateTimeFormat('ja-JP', dateOptions).format(dateString);
 };
 
+// 日時をフォーマットする関数
+export function formatDateTimeDetailed(date: Date) {
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  
+  const dateTimeStr = date.toLocaleString('ja-JP', options);
+  const dateStr = date.toLocaleDateString('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  
+  return {
+    dateTime: dateTimeStr,
+    date: dateStr
+  };
+}
+
 /**
  * 数値フォーマット関連の関数
  */
@@ -50,9 +73,11 @@ export const formatCurrency = (amount: number) => {
 
 export const parseStringify = (value: any) => JSON.parse(JSON.stringify(value));
 
-export const removeSpecialCharacters = (value: string) => {
-  return value.replace(/[^\w\s]/gi, "");
-};
+// 特殊文字を取り除く関数
+export function removeSpecialCharacters(str?: string): string {
+  if (!str) return '';
+  return str.replace(/[^\p{L}\p{N}\s]/gu, '');
+}
 
 interface UrlQueryParams {
   params: string;
@@ -198,3 +223,18 @@ export const debugLog = (...args: any[]) => {
     console.log(...args);
   }
 };
+
+export function formatAmount(amount: number): string {
+  const formatter = new Intl.NumberFormat("ja-JP", {
+    style: "currency",
+    currency: "JPY",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  });
+
+  return formatter.format(amount);
+}
+
+export function formatDateShort(date: Date): string {
+  return date.toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' });
+}

@@ -8,6 +8,7 @@ import { Plus, Building, CreditCard, Wallet, Landmark } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import type { Account } from '@/types';
 
+
 // セッション確認とデータ取得を行うメインコンポーネント
 const MyAccounts = async () => {
   try {
@@ -70,7 +71,7 @@ function renderAccountsPage(user: any, accounts: { data: Account[], totalCurrent
           />
         </header>
 
-        <div className="mt-8 mb-8">
+        <div className="mt-2 mb-2">
           <div className="flex flex-col sm:flex-row items-center gap-4 w-auto">
             <div className="flex flex-col sm:flex-row items-center gap-4 flex-grow">
               <div className="py-3 px-5 rounded-lg shadow-md w-full sm:w-auto bg-white">

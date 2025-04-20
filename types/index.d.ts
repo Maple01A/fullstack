@@ -386,3 +386,116 @@ export interface signUpParams {
   firstName: string;
   lastName: string;
 }
+
+export interface SearchParamProps {
+  searchParams?: {
+    page?: string;
+    search?: string;
+    accountId?: string;
+    type?: string;
+    startDate?: string;
+    endDate?: string;
+  };
+}
+
+// 口座関連の型定義
+export type AccountType = 'depository' | 'credit' | 'paypay' | 'paidy' | 'other';
+
+export interface Account {
+  appwriteItemId: string;
+  name: string;
+  type: AccountType;
+  mask?: string;
+  accountNumber?: string;
+  currentBalance: number;
+  icon?: string | null;
+}
+
+export interface AccountsResponse {
+  data: Account[];
+  totalCurrentBalance: number;
+  error: string | null;
+}
+
+export interface AccountResponse {
+  data: Account | null;
+  error: string | null;
+}
+
+export interface AddAccountResponse {
+  success: boolean;
+  data?: { id: string };
+  error: string | null;
+}
+
+export interface DeleteAccountResponse {
+  success: boolean;
+  error: string | null;
+}
+
+// ユーザー関連の型定義
+export interface ServerUser {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
+
+// トランザクション関連の型定義
+export type TransactionType = 'expense' | 'income' | 'transfer';
+
+export interface Transaction {
+  id: string;
+  user_id: string;
+  account_id: string;
+  to_account_id?: string;
+  amount: number;
+  type: TransactionType;
+  category?: string;
+  description?: string;
+  transaction_date: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TransactionData {
+  userId: string;
+  accountId: string;
+  toAccountId?: string;
+  amount: number;
+  type: TransactionType;
+  category?: string;
+  description?: string;
+  transactionDate: string;
+}
+
+export interface GetTransactionsParams {
+  userId?: string;
+  accountId?: string;
+  page?: number;
+  limit?: number;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+  type?: string;
+  category?: string;
+}
+
+export interface TransactionsResponse {
+  data: Transaction[];
+  total: number;
+  totalPages: number;
+  expenseTotal: number;
+  incomeTotal: number;
+  error: string | null;
+}
+
+export interface TransactionResponse {
+  data: Transaction | null;
+  error: string | null;
+}
+
+// 検索パラメーター
+export interface SearchParamProps {
+  searchParams: { [key: string]: string | string[] | undefined };
+}
