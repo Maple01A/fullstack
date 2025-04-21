@@ -36,8 +36,6 @@ const MyAccounts = async () => {
     // 正常にデータが取得できた場合はページレンダリング
     return renderAccountsPage(user, accounts);
   } catch (error) {
-    console.error('口座情報取得エラー:', error);
-    // エラー発生時はサインインページにリダイレクト
     return redirect('/sign-in');
   }
 };

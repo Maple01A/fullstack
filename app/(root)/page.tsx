@@ -63,9 +63,6 @@ export default function Home() {
             endDate
           });
 
-          // データ存在確認のログ
-          console.log(`取得した取引数: ${transactionsResponse.data?.length || 0}`);
-          
           setTransactions(transactionsResponse.data || []);
         }
       } catch (error) {
@@ -115,7 +112,7 @@ export default function Home() {
     if (transaction.type === 'expense') {
       let category = transaction.category || '未分類';
       switch (category) {
-        case 'salary': category = '給与'; break;
+        case 'salary': category = '給料'; break;
         case 'food': category = '食費'; break;
         case 'housing': category = '住居費'; break;
         case 'utilities': category = '光熱費'; break;
@@ -356,47 +353,47 @@ export default function Home() {
             <h2 className="text-lg font-bold text-gray-800">最近の取引</h2>
             <Link href="/transaction-history">
               <span className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                すべて見る →
+                すべて見る
               </span>
             </Link>
           </div>
 
-            {sortedTransactions.slice(0, 5).length > 0 ? (
+          {sortedTransactions.slice(0, 5).length > 0 ? (
             <div className="divide-y">
               {sortedTransactions.slice(0, 5).map((transaction) => (
-              <div
-                key={transaction.id}
-                className="py-3 flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 rounded-lg px-2"
-              >
-                <div className="flex items-center">
-                <div className={`p-2 rounded-full ${transaction.type === 'expense' ? 'bg-red-100' :
-                  transaction.type === 'income' ? 'bg-green-100' : 'bg-blue-100'
-                  } mr-3`}>
-                  {transaction.type === 'expense' ?
-                  <ArrowUpRight size={16} className="text-red-600" /> :
-                  <ArrowDownRight size={16} className="text-green-600" />
-                  }
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">{transaction.name || transaction.title}</p>
-                  <div className="flex items-center text-xs text-gray-500">
-                  <span>{format(new Date(transaction.created_at), 'M月d日', { locale: ja })}</span>
+                <div
+                  key={transaction.id}
+                  className="py-3 flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 rounded-lg px-2"
+                >
+                  <div className="flex items-center">
+                    <div className={`p-2 rounded-full ${transaction.type === 'expense' ? 'bg-red-100' :
+                      transaction.type === 'income' ? 'bg-green-100' : 'bg-blue-100'
+                      } mr-3`}>
+                      {transaction.type === 'expense' ?
+                        <ArrowUpRight size={16} className="text-red-600" /> :
+                        <ArrowDownRight size={16} className="text-green-600" />
+                      }
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800">{transaction.name || transaction.title}</p>
+                      <div className="flex items-center text-xs text-gray-500">
+                        <span>{format(new Date(transaction.created_at), 'M月d日', { locale: ja })}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`font-medium ${transaction.type === 'expense' ? 'text-red-600' : 'text-green-600'
+                    }`}>
+                    {transaction.type === 'expense' ? '-' : '+'}
+                    {formatCurrency(transaction.amount)}
                   </div>
                 </div>
-                </div>
-                <div className={`font-medium ${transaction.type === 'expense' ? 'text-red-600' : 'text-green-600'
-                }`}>
-                {transaction.type === 'expense' ? '-' : '+'}
-                {formatCurrency(transaction.amount)}
-                </div>
-              </div>
               ))}
             </div>
-            ) : (
+          ) : (
             <div className="py-8 text-center">
               <p className="text-gray-500">取引履歴がありません</p>
             </div>
-            )}
+          )}
         </div>
       </div>
     </section>

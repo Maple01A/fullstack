@@ -28,15 +28,12 @@ async function AddFinancialPlanPage() {
                 <span className="text-sm">戻る</span>
               </Link>
             </div>
-            
+
             <div className="bg-white rounded-xl shadow-md p-8 text-center">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Ban size={28} className="text-red-500" />
-              </div>
               <h2 className="text-xl font-semibold text-gray-800 mb-2">口座が登録されていません</h2>
               <p className="text-gray-600 mb-6">収支計画を追加するには、まず口座を登録してください。</p>
-              <Link 
-                href="/my-account/add" 
+              <Link
+                href="/my-account/add"
                 className="inline-block bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 口座を追加する
@@ -57,7 +54,7 @@ async function AddFinancialPlanPage() {
               <span className="text-sm">戻る</span>
             </Link>
           </div>
-          
+
           <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-4 sm:p-5 rounded-t-xl shadow-sm">
             <div className="flex items-center gap-3">
               <div>
@@ -66,7 +63,7 @@ async function AddFinancialPlanPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-b-xl shadow-md p-5">
             <div className="mb-4 border-b border-gray-100 pb-3">
               <h2 className="text-base font-semibold text-gray-800 flex items-center gap-2">
@@ -74,7 +71,7 @@ async function AddFinancialPlanPage() {
                 計画情報入力 <span className="text-xs text-gray-500 font-normal">（<span className="text-red-500">*</span>は必須項目）</span>
               </h2>
             </div>
-            
+
             <AddFinancialPlanForm userId={loggedIn.id} accounts={accounts} />
           </div>
         </div>
@@ -82,8 +79,6 @@ async function AddFinancialPlanPage() {
     );
 
   } catch (error) {
-    console.error('口座取得エラー:', error);
-    
     // エラー表示
     return (
       <section className='flex flex-col w-full bg-gray-50 min-h-screen'>
@@ -94,7 +89,7 @@ async function AddFinancialPlanPage() {
               <span className="text-sm">戻る</span>
             </Link>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-md p-8 text-center">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Ban size={28} className="text-red-500" />
@@ -104,11 +99,11 @@ async function AddFinancialPlanPage() {
               口座情報の取得中にエラーが発生しました。<br />
               しばらく経ってから再度お試しください。
             </p>
-            <Link 
-              href="/payment-transfer" 
+            <Link
+              href="/payment-transfer"
               className="inline-block bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
-              収支計画に戻る
+              戻る
             </Link>
           </div>
         </div>

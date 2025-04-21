@@ -1,7 +1,7 @@
 import { startOfMonth, endOfMonth, format, addDays, isAfter, isSameDay, compareAsc } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import HeaderBox from '@/components/ui/HeaderBox';
-import { getFinancialPlanEvents } from '@/lib/actions/plan.actions';
+import { getFinancialPlanEvents, cleanupExpiredEvents } from '@/lib/actions/plan.actions';
 import { getServerUser } from '@/lib/actions/user.server.actions';
 import { getAccounts } from '@/lib/actions/bank.actions';
 import { redirect } from 'next/navigation';
@@ -20,7 +20,7 @@ async function FinancialPlanPage() {
 
     console.log("ログインユーザー情報:", loggedIn);
 
-    // 現在の月の最初と最後の日を取得
+    // 日付関連の設定
     const today = new Date();
     const startDate = startOfMonth(today);
     const endDate = endOfMonth(today);
@@ -32,10 +32,18 @@ async function FinancialPlanPage() {
     });
 
     try {
+        // ページ読み込み時に期限切れイベントを自動削除
+        const cleanupResult = await cleanupExpiredEvents();
+        if (cleanupResult.success) {
+            console.log(`${cleanupResult.count}件の期限切れイベントを削除しました`);
+        } else {
+            console.warn("期限切れイベントの削除に失敗しました");
+        }
+
         // 収支計画のデータを取得
         const events = await getFinancialPlanEvents({
             startDate: startDate.toISOString(),
-            endDate: endOfMonth(addDays(today, 90)).toISOString() // より広い範囲で取得
+            endDate: endOfMonth(addDays(today, 90)).toISOString() // 90日先まで取得
         });
 
         // デバッグ情報を詳細に出力
@@ -45,9 +53,8 @@ async function FinancialPlanPage() {
         } else {
             console.log("取得したイベントはありません");
         }
-        
+
         // 日付が今日以降のイベントを確認
-        console.log("デバッグ: 今日以降のイベントチェック");
         events.forEach(event => {
             try {
                 const eventDate = new Date(event.date || '');
@@ -93,7 +100,7 @@ async function FinancialPlanPage() {
         }, {});
 
         // 日付ごとのイベント数を確認
-        console.log("日付ごとのイベント数:", 
+        console.log("日付ごとのイベント数:",
             Object.keys(eventsByDate).map(date => `${date}: ${eventsByDate[date].length}件`));
 
         // 今後の予定のみを抽出（完了していないもの）
@@ -105,16 +112,16 @@ async function FinancialPlanPage() {
                         console.log(`日付なしイベント: ${event.title || 'タイトルなし'}`);
                         return false;
                     }
-                    
+
                     // 日付をDate型に変換
                     const eventDate = new Date(event.date);
-                    
+
                     // 有効な日付かチェック
                     if (isNaN(eventDate.getTime())) {
                         console.log(`無効な日付: ${event.date}, イベント: ${event.title || 'タイトルなし'}`);
                         return false;
                     }
-                    
+
                     // イベントデータの構造をログ
                     console.log(`イベントデータ: ${JSON.stringify({
                         id: event.id,
@@ -123,11 +130,11 @@ async function FinancialPlanPage() {
                         type: event.type,
                         completed: event.completed
                     })}`);
-                    
+
                     // 現在の日付以降で、まだ完了していないイベントのみフィルタリング
                     const isFutureEvent = (isAfter(eventDate, today) || isSameDay(eventDate, today));
                     const isNotCompleted = !event.completed;
-                    
+
                     return isFutureEvent && isNotCompleted;
                 } catch (error) {
                     console.error(`イベントフィルタリングエラー: ${error}`);
@@ -138,8 +145,6 @@ async function FinancialPlanPage() {
                 // 日付でソート
                 return new Date(a.date).getTime() - new Date(b.date).getTime();
             });
-
-        console.log(`今後の予定数: ${futureEvents.length}`);
 
         // 以下コードは変更なし - ページをレンダリングする部分
         return (
@@ -186,7 +191,7 @@ async function FinancialPlanPage() {
                         </div>
                     </div>
 
-                    {/* 2段レイアウト - カレンダーと今後の予定 */}
+                    {/* カレンダーと今後の予定 */}
                     <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
                         {/* ミニカレンダー */}
                         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-4">
@@ -255,7 +260,7 @@ async function FinancialPlanPage() {
                                         // イベントの日付を取得
                                         const eventDate = new Date(event.date || '');
                                         const isToday = isSameDay(eventDate, today);
-                                        
+
                                         return (
                                             <div key={i} className="p-3">
                                                 <div className="flex items-center mb-2">
@@ -312,8 +317,7 @@ async function FinancialPlanPage() {
             </section>
         );
     } catch (error: any) {
-        console.error("収支計画ページでエラーが発生しました:", error);
-        
+
         return (
             <section className='home'>
                 <div className='home-content'>
@@ -325,7 +329,7 @@ async function FinancialPlanPage() {
                             subtext='収支計画カレンダー'
                         />
                     </header>
-                    
+
                     <div className="mt-6 bg-white rounded-xl shadow-md p-8">
                         <div className="text-center">
                             <h2 className="text-xl font-semibold text-red-600 mb-4">エラーが発生しました</h2>

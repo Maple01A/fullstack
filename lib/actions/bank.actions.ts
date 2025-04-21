@@ -88,43 +88,60 @@ export async function getAccounts({ userId }: { userId: string }): Promise<Accou
   }
 }
 
-// 口座詳細取得
-export async function getAccount(id: string): Promise<AccountResponse> {
+// lib/actions/bank.actions.ts の getAccount 関数を修正
+export async function getAccount(accountId: string) {
   try {
+    const user = await getServerUser();
+    if (!user) return { success: false, message: 'User not authenticated' };
+
+    // 口座データを取得
     const supabase = getSupabase();
-    
-    const { data, error } = await supabase
+    const { data: account, error } = await supabase
       .from('bank_accounts')
       .select('*')
-      .eq('id', id)
+      .eq('id', accountId)
+      .eq('user_id', user.id)
       .single();
       
     if (error) {
-      throw error;
+      console.error("口座データ取得エラー:", error);
+      return { success: false, message: error.message };
     }
-    
-    if (!data) {
-      throw new Error("口座が見つかりません");
+
+    // 口座に関連する取引データを取得
+    const { data: transactions, error: txError } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('account_id', accountId)
+      .eq('user_id', user.id)
+      .order('transaction_date', { ascending: false })
+      .limit(10);
+      
+    if (txError) {
+      console.error("取引データ取得エラー:", txError);
+      // トランザクションのエラーは致命的ではないので続行
+      console.warn("取引データの取得に失敗しましたが、口座情報は表示します");
     }
+
+    // データ変換 - データベースのスネークケースからキャメルケースへ
+    if (account) {
+      // スネークケースのプロパティをキャメルケースへ
+      account.currentBalance = account.current_balance;
+      account.updatedAt = account.updated_at;
+      // 他の必要なプロパティも同様に
+    }
+
+    // デバッグ情報
+    console.log(`口座ID: ${accountId} の取引データ: ${transactions?.length || 0}件`);
     
     return {
-      data: {
-        appwriteItemId: data.id,
-        name: data.name || '',
-        type: data.type || 'depository',
-        mask: data.mask || '',
-        accountNumber: data.account_number || '',
-        currentBalance: data.current_balance || 0,
-        icon: data.icon || null
-      },
-      error: null
+      success: true,
+      data: account,
+      transactions: transactions || []
     };
   } catch (error: any) {
-    console.error("口座詳細取得エラー:", error);
-    return {
-      data: null,
-      error: error.message
-    };
+    console.error("アカウント取得エラー:", error.message);
+    return { success: false, message: error.message };
   }
 }
 

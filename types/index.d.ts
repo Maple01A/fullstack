@@ -495,7 +495,13 @@ export interface TransactionResponse {
   error: string | null;
 }
 
-// 検索パラメーター
 export interface SearchParamProps {
   searchParams: { [key: string]: string | string[] | undefined };
+}
+
+//バンクアカウントIDページ
+export interface BankDetailsPageProps {
+  params: {
+    id: string;
+  };
 }

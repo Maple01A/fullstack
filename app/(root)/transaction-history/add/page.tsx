@@ -1,4 +1,3 @@
-import HeaderBox from '@/components/ui/HeaderBox';
 import { getServerUser } from '@/lib/actions/user.server.actions';
 import { redirect } from 'next/navigation';
 import AddTransactionForm from '@/components/ui/AddTransactionForm';
@@ -14,7 +13,7 @@ const AddTransaction = async () => {
   }
 
   // ユーザーIDを正しく抽出 (getServerUser()の戻り値に合わせる)
-  const userId = user.id; // 修正: user.id を使用
+  const userId = user.id; 
 
   // デバッグ情報を追加
   console.log('ユーザー情報:', { user, userId });
@@ -91,7 +90,6 @@ const AddTransaction = async () => {
       </section>
     );
   } catch (error) {
-    console.error('口座取得エラー:', error);
     
     // エラー表示
     return (
@@ -117,7 +115,7 @@ const AddTransaction = async () => {
               href="/transaction-history" 
               className="inline-block bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
-              取引履歴に戻る
+              戻る
             </Link>
           </div>
         </div>

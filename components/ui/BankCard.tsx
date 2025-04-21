@@ -79,19 +79,19 @@ const BankCard = ({ account, userName, showBalance = true, showActions = true }:
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      
+
       // 削除前の確認
       const confirmDelete = window.confirm('本当にこの口座を削除しますか？\nこの操作は元に戻せません。');
       if (!confirmDelete) {
         setIsDeleting(false);
         return;
       }
-      
+
       // Supabase APIエンドポイントを使用
       const response = await fetch(`/api/bank/delete?id=${account.appwriteItemId}`, {
         method: 'DELETE',
       });
-      
+
       if (response.ok) {
         router.refresh();
       } else {
@@ -127,7 +127,7 @@ const BankCard = ({ account, userName, showBalance = true, showActions = true }:
         <div className="flex items-center gap-3">
           <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getIconBackground(account.type)}`}>
             {/* 空の文字列を回避し、デフォルトアイコンを使用 */}
-            <Image 
+            <Image
               src={iconSrc}
               alt={account.name || account.type}
               width={20}
@@ -157,8 +157,8 @@ const BankCard = ({ account, userName, showBalance = true, showActions = true }:
                 <Edit size={16} className="mr-2" />
                 <span>編集</span>
               </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={handleDelete} 
+              <DropdownMenuItem
+                onClick={handleDelete}
                 className="cursor-pointer text-red-600"
                 disabled={isDeleting}
               >
@@ -171,11 +171,11 @@ const BankCard = ({ account, userName, showBalance = true, showActions = true }:
       </div>
 
       {showBalance && (
-        <div className="mt-2">
-          <p className="text-sm text-gray-500">残高</p>
-          <p className={`text-lg font-bold ${account.currentBalance < 0 ? 'text-red-600' : 'text-gray-800'}`}>
-            {formatCurrency(account.currentBalance)}
-          </p>
+        <div className="mt-4">
+          <div className="text-xs text-gray-500 mb-1">残高</div>
+          <div className={`font-bold text-lg ${(account.current_balance || account.currentBalance) < 0 ? 'text-red-600' : 'text-gray-800'}`}>
+            {formatCurrency(account.current_balance || account.currentBalance || 0)}
+          </div>
         </div>
       )}
 

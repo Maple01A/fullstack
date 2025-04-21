@@ -3,7 +3,6 @@ import { Pagination } from '@/components/ui/Pagination';
 import TransactionsTable from '@/components/ui/TransactionTable';
 import { getServerUser } from '@/lib/actions/user.server.actions';
 import { getTransactions } from '@/lib/actions/transaction.actions';
-import { formatAmount } from '@/lib/utils';
 import { getAccounts } from '@/lib/actions/bank.actions';
 import { SearchParamProps } from '@/types';
 import Link from 'next/link';
@@ -14,13 +13,10 @@ import { Input } from '@/components/ui/Input';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 
-/**
- * 取引履歴一覧ページ
- */
+
 const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
     const user = await getServerUser();
 
-    // 未ログインの場合はログインページにリダイレクト
     if (!user) {
         return redirect('/sign-in');
     }
@@ -90,7 +86,7 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
                             <div className="py-3 px-5 rounded-lg shadow-md w-full sm:w-auto bg-white">
                                 <p className="text-sm text-gray-500">最新の取引日</p>
                                 <p className="text-2xl font-bold text-blue-700">
-                                    {transactions.length > 0 ? 
+                                    {transactions.length > 0 ?
                                         format(new Date(transactions[0].transaction_date || transactions[0].date), 'yyyy年MM月dd日', { locale: ja }) : 'なし'}
                                 </p>
                             </div>
@@ -111,7 +107,7 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
                             <h3 className="text-lg font-medium">詳細検索</h3>
                             <ChevronDown className="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" />
                         </summary>
-                        
+
                         <form className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* 検索キーワード */}
                             <div>
@@ -190,7 +186,6 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
                             {/* 検索ボタン */}
                             <div className="md:col-span-2 flex justify-end gap-2 mt-2">
                                 <Button type="submit" className="flex items-center gap-2">
-                                    <FileText size={16} />
                                     検索
                                 </Button>
                             </div>
@@ -201,7 +196,7 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
                 {/* 現在の表示期間 */}
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-semibold">
-                        取引一覧
+                        取引記録
                     </h2>
                     <div className="text-sm text-gray-500">
                         表示期間: {format(startDate, 'yyyy年MM月dd日', { locale: ja })} ~ {format(endDate, 'yyyy年MM月dd日', { locale: ja })}

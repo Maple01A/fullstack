@@ -63,12 +63,18 @@ export function formatDateTimeDetailed(date: Date) {
 /**
  * 数値フォーマット関連の関数
  */
-export const formatCurrency = (amount: number) => {
+export const formatCurrency = (amount: number | string | undefined): string => {
+  if (amount === undefined || amount === null) {
+    return '¥0';
+  }
+  
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  
   return new Intl.NumberFormat('ja-JP', {
     style: 'currency',
     currency: 'JPY',
-    minimumFractionDigits: 0,
-  }).format(amount);
+    minimumFractionDigits: 0
+  }).format(numAmount);
 };
 
 export const parseStringify = (value: any) => JSON.parse(JSON.stringify(value));
@@ -238,3 +244,4 @@ export function formatAmount(amount: number): string {
 export function formatDateShort(date: Date): string {
   return date.toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' });
 }
+

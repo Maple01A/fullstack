@@ -6,12 +6,7 @@ import { formatCurrency } from '@/lib/utils';
 import { ArrowLeft, Edit, CreditCard, Calendar, Tag, ArrowDownCircle, ArrowUpCircle, Wallet, CreditCard as CreditCardIcon } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-
-interface BankDetailsPageProps {
-  params: {
-    id: string;
-  };
-}
+import { BankDetailsPageProps } from '@/types'
 
 const BankDetailsPage = async ({ params }: BankDetailsPageProps) => {
   const loggedIn = await getServerUser();
@@ -31,9 +26,9 @@ const BankDetailsPage = async ({ params }: BankDetailsPageProps) => {
 
   // アカウントタイプに基づいてアイコンを選択
   const getAccountIcon = () => {
-    switch(account.type) {
+    switch (account.type) {
       case 'credit': return <CreditCardIcon size={20} className="text-green-600" />;
-      case 'paypay': 
+      case 'paypay': return <Wallet size={20} className="text-red-600" />;
       case 'paidy': return <Wallet size={20} className="text-red-600" />;
       default: return <CreditCard size={20} className="text-blue-600" />;
     }
@@ -49,7 +44,7 @@ const BankDetailsPage = async ({ params }: BankDetailsPageProps) => {
             <span className="text-sm">戻る</span>
           </Link>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* 左カラム - 口座カードとアクション */}
           <div className="md:col-span-1">
@@ -68,7 +63,7 @@ const BankDetailsPage = async ({ params }: BankDetailsPageProps) => {
               </Button>
             </Link>
           </div>
-          
+
           {/* 右カラム - 口座情報と取引履歴 */}
           <div className="md:col-span-2 space-y-8">
             {/* 口座情報セクション */}
@@ -92,24 +87,23 @@ const BankDetailsPage = async ({ params }: BankDetailsPageProps) => {
                   <div>
                     <dt className="text-sm text-gray-500 mb-1">口座タイプ</dt>
                     <dd className="font-medium">
-                      <span className={`inline-flex px-2 py-1 rounded-full text-xs ${
-                        account.type === 'depository' ? 'bg-blue-100 text-blue-800' :
+                      <span className={`inline-flex px-2 py-1 rounded-full text-xs ${account.type === 'depository' ? 'bg-blue-100 text-blue-800' :
                         account.type === 'credit' ? 'bg-green-100 text-green-800' :
-                        account.type === 'paypay' ? 'bg-red-100 text-red-800' :
-                        account.type === 'paidy' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {account.type === 'depository' ? '普通・定期預金' : 
-                        account.type === 'credit' ? 'クレジットカード' :
-                        account.type === 'paypay' ? 'PayPay' :
-                        account.type === 'paidy' ? 'Paidy' : account.type}
+                          account.type === 'paypay' ? 'bg-red-100 text-red-800' :
+                            account.type === 'paidy' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                        {account.type === 'depository' ? '普通・定期預金' :
+                          account.type === 'credit' ? 'クレジットカード' :
+                            account.type === 'paypay' ? 'PayPay' :
+                              account.type === 'paidy' ? 'Paidy' : account.type}
                       </span>
                     </dd>
                   </div>
                   <div>
                     <dt className="text-sm text-gray-500 mb-1">残高</dt>
                     <dd className="font-bold text-xl">
-                      <span className={`${account.currentBalance < 0 ? 'text-red-600' : 'text-blue-700'}`}>
-                        {formatCurrency(account.currentBalance)}
+                      <span className={`${(account.current_balance || account.currentBalance) < 0 ? 'text-red-600' : 'text-blue-700'}`}>
+                        {formatCurrency(account.current_balance || account.currentBalance || 0)}
                       </span>
                     </dd>
                   </div>
@@ -128,38 +122,53 @@ const BankDetailsPage = async ({ params }: BankDetailsPageProps) => {
                 </div>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
+                    {/* thead部分の修正 - カラム数を合わせる */}
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日付</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">内容</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">カテゴリー</th>
                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">金額</th>
                       </tr>
                     </thead>
+
+                    {/* tbody部分の修正 - トランザクションデータの処理を修正 */}
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {transactions.map((transaction) => (
-                        <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.date}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{transaction.name}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              <Tag size={12} className="mr-1" />
-                              {transaction.category || '未分類'}
-                            </span>
-                          </td>
-                          <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium ${
-                            transaction.amount < 0 ? 'text-red-600' : 'text-green-600'
-                          }`}>
-                            <span className="flex items-center justify-end">
-                              {transaction.amount < 0 
-                                ? <ArrowUpCircle size={14} className="mr-1 opacity-80" /> 
-                                : <ArrowDownCircle size={14} className="mr-1 opacity-80" />
-                              }
-                              {formatCurrency(Math.abs(transaction.amount))}
-                            </span>
+                      {transactions && transactions.length > 0 ? (
+                        transactions.slice(0, 3).map((transaction) => {
+                          // 日付のフォーマット処理
+                          const transactionDate = new Date(transaction.transaction_date || transaction.created_at);
+                          const formattedDate = `${transactionDate.getMonth() + 1}月${transactionDate.getDate()}日`;
+
+                          return (
+                            <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {formattedDate}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {transaction.title || transaction.name || '未記入'}
+                              </td>
+                              <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium ${transaction.amount < 0 || transaction.type === 'expense'
+                                  ? 'text-red-600'
+                                  : 'text-green-600'
+                                }`}>
+                                <span className="flex items-center justify-end">
+                                  {transaction.amount < 0 || transaction.type === 'expense'
+                                    ? <ArrowUpCircle size={14} className="mr-1 opacity-80" />
+                                    : <ArrowDownCircle size={14} className="mr-1 opacity-80" />
+                                  }
+                                  {formatCurrency(Math.abs(transaction.amount))}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        <tr>
+                          <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                            この口座の取引データはまだありません
                           </td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>

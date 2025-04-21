@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { getSupabase } from '@/lib/supabase/server';
 import { getServerUser } from './user.server.actions';
 import type { ApiResponse } from '@/types';
+import { subDays } from 'date-fns';
 
 // 収支計画イベント型定義
 export interface FinancialPlanEvent {
@@ -349,5 +350,58 @@ export async function completeFinancialPlanEvent(id: string) {
       success: false, 
       error: error.message || "イベント更新中にエラーが発生しました" 
     };
+  }
+}
+
+/**
+ * 期限切れの収支予定を自動的に削除する
+ */
+export async function cleanupExpiredEvents(): Promise<{ success: boolean; count: number }> {
+  try {
+    const user = await getServerUser();
+    if (!user) return { success: false, count: 0 };
+
+    const supabase = getSupabase();
+    
+    // 昨日までの日付を取得（当日は含めない）
+    const yesterday = subDays(new Date(), 1).toISOString();
+    
+    // 完了していない過去の予定を検索
+    const { data, error: findError } = await supabase
+      .from(TABLE_NAME)
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('completed', false)
+      .lt('date', yesterday);
+      
+    if (findError) {
+      console.error("期限切れイベント検索エラー:", findError);
+      return { success: false, count: 0 };
+    }
+    
+    // 削除対象がなければ終了
+    if (!data || data.length === 0) {
+      console.log("削除対象の期限切れイベントはありません");
+      return { success: true, count: 0 };
+    }
+    
+    const expiredIds = data.map(item => item.id);
+    console.log(`${expiredIds.length}件の期限切れイベントを削除します`);
+    
+    // 過去の予定を削除
+    const { error: deleteError } = await supabase
+      .from(TABLE_NAME)
+      .delete()
+      .in('id', expiredIds);
+      
+    if (deleteError) {
+      console.error("期限切れイベント削除エラー:", deleteError);
+      return { success: false, count: 0 };
+    }
+    
+    return { success: true, count: expiredIds.length };
+  } catch (error) {
+    console.error("期限切れイベントのクリーンアップエラー:", error);
+    return { success: false, count: 0 };
   }
 }

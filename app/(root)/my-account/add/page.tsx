@@ -20,7 +20,7 @@ const AddBankPage = async () => {
             <span className="text-sm">戻る</span>
           </Link>
         </div>
-        
+
         <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-4 sm:p-5 rounded-t-xl shadow-sm">
           <div className="flex items-center gap-3">
             <div>
@@ -29,7 +29,6 @@ const AddBankPage = async () => {
             </div>
           </div>
         </div>
-        
         <div className="bg-white rounded-b-xl shadow-md p-5">
           <div className="mb-4 border-b border-gray-100 pb-3">
             <h2 className="text-base font-semibold text-gray-800 flex items-center gap-2">
@@ -37,7 +36,7 @@ const AddBankPage = async () => {
               口座情報入力 <span className="text-xs text-gray-500 font-normal">（<span className="text-red-500">*</span>は必須項目）</span>
             </h2>
           </div>
-          
+
           {/* ここにフォームコンポーネントを追加 - ユーザーIDを渡す */}
           <AddBankForm userId={user.id} />
         </div>
