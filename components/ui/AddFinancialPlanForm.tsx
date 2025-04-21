@@ -11,9 +11,8 @@ import { useRouter } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './Select';
 import { Loader2, Info, Calendar, CheckCircle } from 'lucide-react';
 import { Account } from '@/types';
-import { addFinancialPlanEvent } from '@/lib/actions/plan.actions';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Textarea } from './Textarea';
+
 
 // バリデーションスキーマ
 const formSchema = z.object({
@@ -37,7 +36,7 @@ const AddFinancialPlanForm = ({
 }) => {
   // Supabaseクライアントの初期化
   const supabase = createClientComponentClient();
-  
+
   // アカウントデータを扱いやすくするための処理
   const validatedAccounts = accounts.map(account => {
     return {
@@ -79,10 +78,10 @@ const AddFinancialPlanForm = ({
     try {
       setIsSubmitting(true);
       setError(null);
-      
+
       // セッション確認
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
         setError('認証セッションが無効です。再ログインしてください。');
         setTimeout(() => {
@@ -90,10 +89,10 @@ const AddFinancialPlanForm = ({
         }, 2000);
         return;
       }
-      
+
       // デバッグ用にユーザー情報をログ
       console.log('現在のユーザー情報:', session.user);
-      
+
       // planEventDataの準備部分を修正
       const planEventData = {
         user_id: session.user.id,  // ユーザーIDを明示的に追加
@@ -106,24 +105,24 @@ const AddFinancialPlanForm = ({
         category: values.category || null,
         completed: false
       };
-      
+
       console.log('送信するデータ:', planEventData);
-      
+
       // クライアントから直接Supabaseにデータ挿入
       const { error, data } = await supabase
         .from('events')
         .insert([planEventData])
         .select();
-        
+
       if (error) {
         setError(`データ保存エラー: ${error.message}`);
         return;
       }
 
       form.reset();
-       router.refresh();
-       router.push('/payment-transfer');
-      
+      router.refresh();
+      router.push('/payment-transfer');
+
     } catch (error: any) {
       console.error('Form submission error:', error);
       setError(`エラー: ${error.message || '予定の追加に失敗しました'}`);
@@ -287,7 +286,7 @@ const AddFinancialPlanForm = ({
                 )}
               />
             )}
-            
+
             {/* カテゴリ */}
             <FormField
               key="category-field"
@@ -303,18 +302,18 @@ const AddFinancialPlanForm = ({
                       value={field.value || ""}
                     >
                       <option value="">選択（任意）</option>
-                        {[
-                          { id: 'food', name: '食費' },
-                          { id: 'utilities', name: '光熱費' },
-                          { id: 'entertainment', name: '娯楽費' },
-                          { id: 'transportation', name: '交通費' },
-                          { id: 'housing', name: '住居費' },
-                          { id: 'salary', name: '給料' },
-                          { id: 'other', name: 'その他' }
-                        ].map((category, index) => (
-                          <option key={`category-${index}`} value={category.id}>
-                            {category.name}
-                          </option>
+                      {[
+                        { id: 'food', name: '食費' },
+                        { id: 'utilities', name: '光熱費' },
+                        { id: 'entertainment', name: '娯楽費' },
+                        { id: 'transportation', name: '交通費' },
+                        { id: 'housing', name: '住居費' },
+                        { id: 'salary', name: '給料' },
+                        { id: 'other', name: 'その他' }
+                      ].map((category, index) => (
+                        <option key={`category-${index}`} value={category.id}>
+                          {category.name}
+                        </option>
                       ))}
                     </select>
                   </FormControl>
@@ -323,7 +322,7 @@ const AddFinancialPlanForm = ({
               )}
             />
           </div>
-          
+
           {/* 送信ボタン */}
           <div className="pt-4 border-t border-gray-100 mt-4">
             <Button
@@ -347,7 +346,6 @@ const AddFinancialPlanForm = ({
 
 export default AddFinancialPlanForm;
 
-// filepath: [plan.actions.ts](http://_vscodecontentref_/0)
 export async function getFinancialPlanEvents({ startDate, endDate }: { startDate?: string, endDate?: string }) {
   try {
     const user = await getServerUser();
@@ -358,13 +356,13 @@ export async function getFinancialPlanEvents({ startDate, endDate }: { startDate
 
     console.log("収支計画イベント取得リクエスト - ユーザーID:", user.id);
     const supabase = getSupabase();
-    
+
     // テーブル名を明示的に指定 (TABLE_NAMEは使わない)
     let query = supabase
-      .from('events')  // 実際のテーブル名を直接指定
+      .from('events')
       .select('*')
       .eq('user_id', user.id);
-    
+
     // 日付範囲指定
     if (startDate) {
       query = query.gte('date', startDate);
@@ -372,7 +370,7 @@ export async function getFinancialPlanEvents({ startDate, endDate }: { startDate
     if (endDate) {
       query = query.lte('date', endDate);
     }
-    
+
     const { data, error } = await query;
 
     if (error) {
@@ -381,18 +379,18 @@ export async function getFinancialPlanEvents({ startDate, endDate }: { startDate
     }
 
     console.log(`取得結果: ${data?.length || 0}件`);
-    
+
     // データ構造を確認
     if (data && data.length > 0) {
       console.log("取得したデータ最初の要素:", JSON.stringify(data[0]));
     } else {
       console.log("取得したイベントはありません");
-      
+
       // デバッグ: テーブル内のすべてのデータを取得
       const { data: allData } = await supabase
         .from('events')
         .select('*');
-      
+
       console.log(`テーブル内の全データ件数: ${allData?.length || 0}`);
       if (allData && allData.length > 0) {
         console.log("テーブル内の最初のデータ:", JSON.stringify(allData[0]));

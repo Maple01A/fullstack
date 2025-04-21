@@ -61,16 +61,16 @@ const TransactionsTable = ({ transactions, accounts }: TransactionsTableProps) =
       if (!transaction) {
         throw new Error('取引情報が見つかりません');
       }
-      
+
       console.log('削除する取引:', transaction);
-      
+
       // 削除API呼び出し - この中で残高更新も行う
       const result = await deleteTransaction(id);
 
       if (result.success) {
         // 成功時は明確なメッセージを表示
         let successMessage = '取引が削除されました\n';
-        
+
         // 取引タイプに応じたメッセージを付加
         if (transaction.type === 'expense') {
           successMessage += `支出分${formatCurrency(transaction.amount)}が残高に戻されました`;
@@ -79,20 +79,20 @@ const TransactionsTable = ({ transactions, accounts }: TransactionsTableProps) =
         } else if (transaction.type === 'transfer') {
           successMessage += '振替取引が元に戻されました';
         }
-        
+
         setToast({
           message: successMessage,
           type: 'success'
         });
-        
+
         // 画面を更新して残高の変更を反映（より強力な更新）
         router.refresh();
-        
+
         // 場合によっては、遅延を入れて再度更新
         setTimeout(() => {
           router.refresh();
         }, 500);
-        
+
         // または特定のページにリダイレクト
         // router.push('/transaction-history');
       } else {
@@ -134,7 +134,7 @@ const TransactionsTable = ({ transactions, accounts }: TransactionsTableProps) =
       {toast && (
         <div className={`p-3 rounded mb-4 ${toast.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
           {toast.message}
-          <button 
+          <button
             className="ml-2 text-sm"
             onClick={() => setToast(null)}
           >
@@ -223,7 +223,7 @@ const TransactionsTable = ({ transactions, accounts }: TransactionsTableProps) =
                 </td>
               </tr>
             ))}
-            
+
             {/* 取引がない場合 */}
             {transactions.length === 0 && (
               <tr>

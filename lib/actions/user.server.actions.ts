@@ -8,12 +8,12 @@ export async function getServerUser() {
   try {
     // サーバー側で使えるクッキーストア
     const cookieStore = cookies();
-    
+
     // サーバー用のSupabaseクライアント作成
-    const supabase = createServerComponentClient({ 
-      cookies: () => cookieStore 
+    const supabase = createServerComponentClient({
+      cookies: () => cookieStore
     });
-    
+
     // セッション情報を取得
     const { data: { session } } = await supabase.auth.getSession();
 

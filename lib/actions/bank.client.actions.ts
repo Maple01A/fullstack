@@ -15,14 +15,14 @@ export async function getClientAccounts(userId: string): Promise<AccountsRespons
     }
 
     const supabase = createClientComponentClient();
-    
+
     // ユーザーの銀行口座一覧を取得
     const { data, error } = await supabase
       .from('bank_accounts')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
-      
+
     if (error) {
       console.error("口座取得エラー:", error);
       return {
@@ -31,7 +31,7 @@ export async function getClientAccounts(userId: string): Promise<AccountsRespons
         error: error.message || "口座情報の取得に失敗しました"
       };
     }
-    
+
     if (!data || data.length === 0) {
       return {
         data: [],
@@ -39,7 +39,7 @@ export async function getClientAccounts(userId: string): Promise<AccountsRespons
         error: null
       };
     }
-    
+
     // データ形式の変換
     const accounts: Account[] = data.map(account => ({
       id: account.id, // 元のIDを保持
@@ -51,12 +51,12 @@ export async function getClientAccounts(userId: string): Promise<AccountsRespons
       currentBalance: account.current_balance || 0,
       icon: account.icon || null
     }));
-    
+
     // 合計残高計算
     const totalCurrentBalance = accounts.reduce(
       (sum, account) => sum + account.currentBalance, 0
     );
-    
+
     return {
       data: accounts,
       totalCurrentBalance,

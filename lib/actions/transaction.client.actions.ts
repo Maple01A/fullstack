@@ -28,46 +28,46 @@ export async function getClientTransactions(params = {}) {
     }
 
     const supabase = createClientComponentClient();
-    
+
     // 検索クエリ構築
     let query = supabase
       .from('transactions')
       .select('*', { count: 'exact' })
       .eq('user_id', userId);
-    
+
     // 口座フィルター
     if (accountId) {
       query = query.eq('account_id', accountId);
     }
-    
+
     // 検索ワードフィルター
     if (search) {
       query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
     }
-    
+
     // 日付フィルター
     if (startDate) {
       query = query.gte('transaction_date', startDate);
     }
-    
+
     if (endDate) {
       query = query.lte('transaction_date', endDate);
     }
-    
+
     // 取引種別フィルター
     if (type) {
       query = query.eq('type', type);
     }
-    
+
     // ページネーション用の範囲を計算
     const from = (page - 1) * limit;
     const to = from + limit - 1;
-    
+
     // データ取得
     const { data: transactions, error, count } = await query
       .order('transaction_date', { ascending: false })
       .range(from, to);
-    
+
     if (error) {
       console.error('トランザクション取得エラー:', error);
       return {
@@ -79,11 +79,11 @@ export async function getClientTransactions(params = {}) {
         error: error.message
       };
     }
-    
+
     // 合計ページ数計算
     const totalItems = count || 0;
     const totalPages = Math.ceil(totalItems / limit);
-    
+
     // 収支の合計を計算するためのクエリ
     const { data: totals } = await supabase
       .from('transactions')
@@ -91,20 +91,20 @@ export async function getClientTransactions(params = {}) {
       .eq('user_id', userId)
       .gte('transaction_date', startDate || '')
       .lte('transaction_date', endDate || '');
-    
+
     let expenseTotal = 0;
     let incomeTotal = 0;
-    
+
     if (totals && totals.length > 0) {
       expenseTotal = totals
         .filter(t => t.type === 'expense')
         .reduce((sum, t) => sum + Number(t.amount), 0);
-      
+
       incomeTotal = totals
         .filter(t => t.type === 'income')
         .reduce((sum, t) => sum + Number(t.amount), 0);
     }
-    
+
     return {
       data: transactions || [],
       total: totalItems,
@@ -139,13 +139,13 @@ export async function addTransaction(data: {
 }) {
   try {
     const supabase = createClientComponentClient();
-    
+
     // セッションからユーザーIDを取得
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData?.session?.user) {
       return { success: false, error: "認証エラー: ログインが必要です" };
     }
-    
+
     // トランザクションデータを準備
     const transactionData = {
       title: data.title,
@@ -159,25 +159,25 @@ export async function addTransaction(data: {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
-    
+
     // トランザクションを挿入
     const { data: result, error } = await supabase
       .from('transactions')
       .insert(transactionData)
       .select()
       .single();
-      
+
     if (error) {
       return { success: false, error: error.message };
     }
-    
+
     // 口座の残高も更新
     await updateAccountBalance(supabase, {
       accountId: data.accountId,
       amount: data.amount,
       type: data.type
     });
-    
+
     return { success: true, data: result };
   } catch (error: any) {
     return { success: false, error: error.message || "予期せぬエラーが発生しました" };
@@ -185,10 +185,10 @@ export async function addTransaction(data: {
 }
 
 // 口座残高更新のヘルパー関数
-async function updateAccountBalance(supabase: any, data: { 
-  accountId: string, 
-  amount: number, 
-  type: string 
+async function updateAccountBalance(supabase: any, data: {
+  accountId: string,
+  amount: number,
+  type: string
 }) {
   try {
     // 口座情報を取得
@@ -197,27 +197,27 @@ async function updateAccountBalance(supabase: any, data: {
       .select('current_balance')
       .eq('id', data.accountId)
       .single();
-    
+
     if (!account) return;
-    
+
     let newBalance = account.current_balance;
-    
+
     // 取引タイプに応じて残高を更新
     if (data.type === 'income') {
       newBalance += data.amount;
     } else if (data.type === 'expense') {
       newBalance -= data.amount;
     }
-    
+
     // 残高を更新
     await supabase
       .from('bank_accounts')
-      .update({ 
+      .update({
         current_balance: newBalance,
         updated_at: new Date().toISOString()
       })
       .eq('id', data.accountId);
-      
+
   } catch (error) {
     console.error('残高更新エラー:', error);
     throw error;

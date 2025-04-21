@@ -55,19 +55,19 @@ const EditBankForm = ({ account }: EditBankFormProps) => {
     try {
       setIsSubmitting(true);
       setError(null);
-      
+
       // 口座名、タイプ、残高のみを更新
       const result = await updateAccount(account.appwriteItemId, {
         name: values.name,
         type: values.type,
         currentBalance: Number(values.currentBalance),
       });
-      
+
       if (result.error) {
         setError(result.error);
         return;
       }
-      
+
       router.refresh();
       router.push('/my-account');
     } catch (error: any) {
@@ -86,7 +86,7 @@ const EditBankForm = ({ account }: EditBankFormProps) => {
             {error}
           </div>
         )}
-        
+
         {/* 口座名 */}
         <FormField
           control={form.control}
@@ -97,9 +97,9 @@ const EditBankForm = ({ account }: EditBankFormProps) => {
                 口座名 <span className="text-red-500">*</span>
               </FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="例: みずほ銀行普通預金" 
-                  {...field} 
+                <Input
+                  placeholder="例: みずほ銀行普通預金"
+                  {...field}
                   className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
               </FormControl>
@@ -145,9 +145,9 @@ const EditBankForm = ({ account }: EditBankFormProps) => {
                 残高 <span className="text-red-500">*</span>
               </FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="例: 100000" 
-                  {...field} 
+                <Input
+                  placeholder="例: 100000"
+                  {...field}
                   className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   onChange={(e) => {
                     const value = e.target.value.replace(/[^0-9]/g, '');
@@ -159,11 +159,11 @@ const EditBankForm = ({ account }: EditBankFormProps) => {
             </FormItem>
           )}
         />
-                {/* 送信ボタン */}
-          <div className="pt-4 border-t border-gray-100 mt-4">
-          <Button 
-            type="submit" 
-            disabled={isSubmitting} 
+        {/* 送信ボタン */}
+        <div className="pt-4 border-t border-gray-100 mt-4">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
             className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5"
           >
             {isSubmitting ? (

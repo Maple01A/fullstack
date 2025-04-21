@@ -76,7 +76,7 @@ const AuthForm = ({ type }: { type: string }) => {
     try {
       if (type === 'sign-up') {
         const { data: newUser, error } = await signUp(data);
-        
+
         if (error) {
           setAuthError(error);
           setIsLoading(false);
@@ -86,12 +86,12 @@ const AuthForm = ({ type }: { type: string }) => {
         setUser(newUser);
         setAuthSuccess("アカウント登録が完了しました！ログインページにリダイレクトします");
         setFormSubmitted(true);
-        
+
         setTimeout(() => {
           router.push('/sign-in');
         }, 2000);
       }
-      
+
       if (type === 'sign-in') {
         const { data: response, error } = await signIn({
           email: data.email,
@@ -116,7 +116,7 @@ const AuthForm = ({ type }: { type: string }) => {
 
   return (
     <section className='auth-form'>
-      <motion.header 
+      <motion.header
         className='flex flex-col gap-5 md:gap-8'
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -127,7 +127,7 @@ const AuthForm = ({ type }: { type: string }) => {
             initial={{ rotate: -10, scale: 0.9, opacity: 0 }}
             animate={{ rotate: 0, scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200 }}
-            whileHover={{ 
+            whileHover={{
               rotate: [0, -10, 0],
               transition: { duration: 0.5 }
             }}
@@ -154,7 +154,7 @@ const AuthForm = ({ type }: { type: string }) => {
 
       <AnimatePresence>
         {authError && (
-          <motion.div 
+          <motion.div
             className="p-3 my-3 bg-red-100 border border-red-400 text-red-700 rounded flex items-center gap-2"
             variants={messageVariants}
             initial="hidden"
@@ -166,10 +166,10 @@ const AuthForm = ({ type }: { type: string }) => {
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       <AnimatePresence>
         {authSuccess && (
-          <motion.div 
+          <motion.div
             className="p-3 my-3 bg-green-100 border border-green-400 text-green-700 rounded flex items-center gap-2"
             variants={messageVariants}
             initial="hidden"
@@ -197,8 +197,8 @@ const AuthForm = ({ type }: { type: string }) => {
           >
             <CheckCircle size={32} className="text-green-600" />
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             className="w-full max-w-xs bg-gray-200 h-2 rounded-full overflow-hidden mt-4"
           >
             <motion.div
@@ -211,7 +211,7 @@ const AuthForm = ({ type }: { type: string }) => {
         </motion.div>
       ) : (
         <Form {...form}>
-          <motion.form 
+          <motion.form
             onSubmit={form.handleSubmit(onSubmit)}
             className={`space-y-8 ${isLoading ? 'opacity-70 pointer-events-none' : ''}`}
             variants={formVariants}
@@ -220,7 +220,7 @@ const AuthForm = ({ type }: { type: string }) => {
           >
             {type === 'sign-up' && (
               <>
-                <motion.div 
+                <motion.div
                   className="flex gap-4"
                   variants={inputVariants}
                   initial="hidden"
@@ -249,10 +249,10 @@ const AuthForm = ({ type }: { type: string }) => {
               custom={type === 'sign-up' ? 2 : 1}
               className="relative"
             >
-              <CustomInput 
-                control={form.control} 
-                name='password' 
-                label="パスワード" 
+              <CustomInput
+                control={form.control}
+                name='password'
+                label="パスワード"
                 placeholder='8文字以上の英数字'
                 type={showPassword ? 'text' : 'password'}
               />
@@ -267,7 +267,7 @@ const AuthForm = ({ type }: { type: string }) => {
               </button>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="flex flex-col gap-4"
               variants={inputVariants}
               initial="hidden"
@@ -280,9 +280,9 @@ const AuthForm = ({ type }: { type: string }) => {
                 whileHover="hover"
                 whileTap="tap"
               >
-                <Button 
-                  type="submit" 
-                  disabled={isLoading} 
+                <Button
+                  type="submit"
+                  disabled={isLoading}
                   className="form-btn w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
                 >
                   {isLoading ? (
@@ -298,7 +298,7 @@ const AuthForm = ({ type }: { type: string }) => {
         </Form>
       )}
 
-      <motion.footer 
+      <motion.footer
         className="flex justify-center gap-1 mt-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

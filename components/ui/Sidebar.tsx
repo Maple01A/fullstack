@@ -31,16 +31,16 @@ const Sidebar = ({ user }: SiderbarProps) => {
 
         <div className='flex flex-col gap-2'>
           {sidebarLinks.map((item) => {
-            const isActive = pathname === item.route || 
+            const isActive = pathname === item.route ||
               pathname.startsWith(`${item.route}/`);
-              
+
             return (
-              <Link 
-                href={item.route} 
+              <Link
+                href={item.route}
                 key={item.label}
                 className={cn(
                   'sidebar-link transition-all duration-200 flex items-center gap-3 p-3 mx-2 rounded-lg',
-                  {'bg-gradient-to-r from-blue-600 to-blue-800 text-white': isActive}
+                  { 'bg-gradient-to-r from-blue-600 to-blue-800 text-white': isActive }
                 )}
               >
                 <div className='relative w-6 h-6 flex-shrink-0'>
@@ -54,7 +54,7 @@ const Sidebar = ({ user }: SiderbarProps) => {
                   />
                 </div>
                 <p className={cn(
-                  'sidebar-label text-gray-700', {'!text-white': isActive}
+                  'sidebar-label text-gray-700', { '!text-white': isActive }
                 )}>
                   {item.label}
                 </p>

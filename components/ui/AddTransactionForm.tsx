@@ -44,7 +44,6 @@ const AddTransactionForm = ({
   userId: string,
   accounts: Account[]
 }) => {
-  // Supabaseのアカウントデータを扱いやすくするための処理
   // appwriteItemIdをそのまま使わず、idプロパティをSupabaseのIDに設定する
   const validatedAccounts = accounts.map(account => {
     return {

@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './Select';
 import { Loader2 } from 'lucide-react';
 
-// バリデーションスキーマ - Supabaseスキーマに合わせて簡素化
+
 const formSchema = z.object({
   name: z.string().min(1, '口座名は必須です'),
   type: z.string().min(1, '口座タイプは必須です'),
@@ -35,32 +35,31 @@ const AddBankForm = ({ userId }: { userId: string }) => {
     },
   });
 
-  // onSubmit 関数の修正
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       // 名前の検証を厳格化
       const trimmedName = (values.name || '').trim();
-      
+
       if (!trimmedName) {
         setError('口座名は必須です');
         return;
       }
-      
+
       setIsSubmitting(true);
       setError(null);
-      
+
       // 確実にstring型で送信
       const result = await addAccount({
-        name: String(trimmedName), // 明示的に文字列に変換
+        name: String(trimmedName),
         type: values.type,
         currentBalance: Number(values.currentBalance),
         userId: userId,
         mask: undefined,
         accountNumber: undefined,
       });
-      
+
       console.log('API応答:', result);
-      
+
       if (result.error) {
         console.error('エラー詳細:', result.error);
         setError(`${result.error}`);
@@ -85,7 +84,7 @@ const AddBankForm = ({ userId }: { userId: string }) => {
             {error}
           </div>
         )}
-        
+
         {/* 口座名 - 必須 */}
         <FormField
           control={form.control}
@@ -96,9 +95,9 @@ const AddBankForm = ({ userId }: { userId: string }) => {
                 口座名 <span className="text-red-500">*</span>
               </FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="例: みずほ銀行普通預金" 
-                  {...field} 
+                <Input
+                  placeholder="例: 普通銀行"
+                  {...field}
                   className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   // フォーカスが外れた時に空白を削除
                   onBlur={(e) => {
@@ -150,8 +149,8 @@ const AddBankForm = ({ userId }: { userId: string }) => {
                 残高 <span className="text-red-500">*</span>
               </FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="10000" 
+                <Input
+                  placeholder="10000"
                   {...field}
                   className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   onChange={(e) => {
@@ -167,9 +166,9 @@ const AddBankForm = ({ userId }: { userId: string }) => {
 
         {/* 送信ボタン */}
         <div className="pt-4 border-t border-gray-100 mt-4">
-          <Button 
-            type="submit" 
-            disabled={isSubmitting} 
+          <Button
+            type="submit"
+            disabled={isSubmitting}
             className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5"
           >
             {isSubmitting ? (

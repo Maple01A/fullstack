@@ -48,7 +48,7 @@ export async function getFinancialPlanEvents({ startDate, endDate }: { startDate
   */
 
   const { data, error } = await query;
-  
+
 
   // SQLの実行でエラーがあった場合は空配列を返す
   if (error) {
@@ -72,14 +72,14 @@ export async function addFinancialPlanEvent(eventData: {
   try {
     // ユーザー認証確認
     const user = await getServerUser();
-    
+
     if (!user) {
       return {
         success: false,
         error: "認証エラー: ユーザーがログインしていません"
       };
     }
-    
+
     // データの検証
     if (!eventData.title || !eventData.date || !eventData.type || eventData.amount <= 0) {
       return {
@@ -87,10 +87,10 @@ export async function addFinancialPlanEvent(eventData: {
         error: "入力データが不足しています"
       };
     }
-    
+
     // Supabaseクライアント取得
     const supabase = getSupabase();
-    
+
     console.log("イベント追加データ:", {
       user_id: user.id,
       title: eventData.title,
@@ -99,7 +99,7 @@ export async function addFinancialPlanEvent(eventData: {
       type: eventData.type,
       amount: eventData.amount
     });
-    
+
     // データを挿入
     const { data, error } = await supabase
       .from(TABLE_NAME)
@@ -118,7 +118,7 @@ export async function addFinancialPlanEvent(eventData: {
       })
       .select()
       .single();
-      
+
     if (error) {
       console.error("収支計画イベント追加エラー:", error);
       return {
@@ -126,12 +126,12 @@ export async function addFinancialPlanEvent(eventData: {
         error: error.message || "イベント追加エラー"
       };
     }
-    
+
     console.log("イベント追加成功:", data);
-    
+
     // キャッシュ更新
     revalidatePath('/payment-transfer');
-    
+
     return {
       success: true,
       data,
@@ -160,17 +160,17 @@ export async function updateFinancialPlanEvent(id: string, eventData: {
   try {
     // ユーザー認証確認
     const user = await getServerUser();
-    
+
     if (!user) {
       return {
         success: false,
         error: "認証エラー: ユーザーがログインしていません"
       };
     }
-    
+
     // Supabaseクライアント取得
     const supabase = getSupabase();
-    
+
     // イベントが存在し、ユーザーのものか確認
     const { data: existingEvent, error: fetchError } = await supabase
       .from(TABLE_NAME)
@@ -178,17 +178,17 @@ export async function updateFinancialPlanEvent(id: string, eventData: {
       .eq('id', id)
       .eq('user_id', user.id)
       .single();
-      
+
     if (fetchError || !existingEvent) {
       return {
         success: false,
         error: "イベントが見つからないか、アクセス権がありません"
       };
     }
-    
+
     // 更新するデータを準備
     const updateData: Record<string, any> = { updated_at: new Date().toISOString() };
-    
+
     if (eventData.title !== undefined) updateData.title = eventData.title;
     if (eventData.description !== undefined) updateData.description = eventData.description;
     if (eventData.date !== undefined) updateData.date = eventData.date;
@@ -197,13 +197,13 @@ export async function updateFinancialPlanEvent(id: string, eventData: {
     if (eventData.account_id !== undefined) updateData.account_id = eventData.account_id;
     if (eventData.category !== undefined) updateData.category = eventData.category;
     if (eventData.completed !== undefined) updateData.completed = eventData.completed;
-    
+
     // データを更新
     const { error: updateError } = await supabase
       .from(TABLE_NAME)
       .update(updateData)
       .eq('id', id);
-      
+
     if (updateError) {
       console.error("収支計画イベント更新エラー:", updateError);
       return {
@@ -211,10 +211,10 @@ export async function updateFinancialPlanEvent(id: string, eventData: {
         error: updateError.message
       };
     }
-    
+
     // キャッシュ更新
     revalidatePath('/payment-transfer');
-    
+
     return {
       success: true,
       error: null
@@ -233,17 +233,17 @@ export async function deleteFinancialPlanEvent(id: string): Promise<ApiResponse>
   try {
     // ユーザー認証確認
     const user = await getServerUser();
-    
+
     if (!user) {
       return {
         success: false,
         error: "認証エラー: ユーザーがログインしていません"
       };
     }
-    
+
     // Supabaseクライアント取得
     const supabase = getSupabase();
-    
+
     // イベントが存在し、ユーザーのものか確認
     const { data: existingEvent, error: fetchError } = await supabase
       .from(TABLE_NAME)
@@ -251,20 +251,20 @@ export async function deleteFinancialPlanEvent(id: string): Promise<ApiResponse>
       .eq('id', id)
       .eq('user_id', user.id)
       .single();
-      
+
     if (fetchError || !existingEvent) {
       return {
         success: false,
         error: "イベントが見つからないか、アクセス権がありません"
       };
     }
-    
+
     // データを削除
     const { error: deleteError } = await supabase
       .from(TABLE_NAME)
       .delete()
       .eq('id', id);
-      
+
     if (deleteError) {
       console.error("収支計画イベント削除エラー:", deleteError);
       return {
@@ -272,10 +272,10 @@ export async function deleteFinancialPlanEvent(id: string): Promise<ApiResponse>
         error: deleteError.message
       };
     }
-    
+
     // キャッシュ更新
     revalidatePath('/payment-transfer');
-    
+
     return {
       success: true,
       error: null
@@ -299,14 +299,14 @@ export async function completeFinancialPlanEvent(id: string) {
   try {
     const user = await getServerUser();
     if (!user) {
-      return { 
-        success: false, 
-        error: "認証エラー: ユーザーがログインしていません" 
+      return {
+        success: false,
+        error: "認証エラー: ユーザーがログインしていません"
       };
     }
-    
+
     const supabase = getSupabase();
-    
+
     // 該当イベントを取得して所有者確認 - TABLE_NAMEを使用
     const { data: event, error: fetchError } = await supabase
       .from(TABLE_NAME)
@@ -314,7 +314,7 @@ export async function completeFinancialPlanEvent(id: string) {
       .eq('id', id)
       .eq('user_id', user.id)
       .single();
-      
+
     if (fetchError || !event) {
       console.error("イベント取得エラー:", fetchError);
       return {
@@ -322,33 +322,33 @@ export async function completeFinancialPlanEvent(id: string) {
         error: "イベントが見つからないか、アクセス権がありません"
       };
     }
-    
+
     // 完了マークを付ける - TABLE_NAMEを使用
     const { error } = await supabase
       .from(TABLE_NAME)
-      .update({ 
+      .update({
         completed: true,
-        updated_at: new Date().toISOString() 
+        updated_at: new Date().toISOString()
       })
       .eq('id', id);
-      
+
     if (error) {
       console.error("イベント更新エラー:", error);
-      return { 
-        success: false, 
-        error: error.message 
+      return {
+        success: false,
+        error: error.message
       };
     }
-    
-    return { 
+
+    return {
       success: true,
       data: { id }
     };
   } catch (error: any) {
     console.error("収支計画更新例外:", error);
-    return { 
-      success: false, 
-      error: error.message || "イベント更新中にエラーが発生しました" 
+    return {
+      success: false,
+      error: error.message || "イベント更新中にエラーが発生しました"
     };
   }
 }
@@ -362,10 +362,10 @@ export async function cleanupExpiredEvents(): Promise<{ success: boolean; count:
     if (!user) return { success: false, count: 0 };
 
     const supabase = getSupabase();
-    
+
     // 昨日までの日付を取得（当日は含めない）
     const yesterday = subDays(new Date(), 1).toISOString();
-    
+
     // 完了していない過去の予定を検索
     const { data, error: findError } = await supabase
       .from(TABLE_NAME)
@@ -373,32 +373,32 @@ export async function cleanupExpiredEvents(): Promise<{ success: boolean; count:
       .eq('user_id', user.id)
       .eq('completed', false)
       .lt('date', yesterday);
-      
+
     if (findError) {
       console.error("期限切れイベント検索エラー:", findError);
       return { success: false, count: 0 };
     }
-    
+
     // 削除対象がなければ終了
     if (!data || data.length === 0) {
       console.log("削除対象の期限切れイベントはありません");
       return { success: true, count: 0 };
     }
-    
+
     const expiredIds = data.map(item => item.id);
     console.log(`${expiredIds.length}件の期限切れイベントを削除します`);
-    
+
     // 過去の予定を削除
     const { error: deleteError } = await supabase
       .from(TABLE_NAME)
       .delete()
       .in('id', expiredIds);
-      
+
     if (deleteError) {
       console.error("期限切れイベント削除エラー:", deleteError);
       return { success: false, count: 0 };
     }
-    
+
     return { success: true, count: expiredIds.length };
   } catch (error) {
     console.error("期限切れイベントのクリーンアップエラー:", error);

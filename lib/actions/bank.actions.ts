@@ -16,45 +16,45 @@ function getSupabase() {
 export async function getAccounts({ userId }: { userId: string }): Promise<AccountsResponse> {
   try {
     console.log("口座一覧取得リクエスト - ユーザーID:", userId);
-    
+
     if (!userId) {
       console.error("無効なユーザーID");
-      return { 
-        data: [], 
-        totalCurrentBalance: 0, 
-        error: "ユーザーIDが指定されていません" 
+      return {
+        data: [],
+        totalCurrentBalance: 0,
+        error: "ユーザーIDが指定されていません"
       };
     }
-    
+
     // Supabaseクライアント取得
     const supabase = getSupabase();
-    
+
     // ユーザーの銀行口座一覧を取得
     const { data, error } = await supabase
       .from('bank_accounts')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
-      
+
     if (error) {
       console.error("口座取得エラー:", error);
-      return { 
-        data: [], 
-        totalCurrentBalance: 0, 
-        error: error.message || "口座情報の取得に失敗しました" 
+      return {
+        data: [],
+        totalCurrentBalance: 0,
+        error: error.message || "口座情報の取得に失敗しました"
       };
     }
-    
+
     // 空のデータの場合は早期リターン
     if (!data || data.length === 0) {
       console.log("このユーザーの口座情報はありません");
-      return { 
-        data: [], 
-        totalCurrentBalance: 0, 
-        error: null 
+      return {
+        data: [],
+        totalCurrentBalance: 0,
+        error: null
       };
     }
-    
+
     // データ形式の変換 - スキーマ変更に合わせて更新
     const accounts: Account[] = data.map(account => ({
       appwriteItemId: account.id,
@@ -65,25 +65,25 @@ export async function getAccounts({ userId }: { userId: string }): Promise<Accou
       currentBalance: account.current_balance || 0,
       icon: account.icon || null
     }));
-    
+
     // 合計残高計算
     const totalCurrentBalance = accounts.reduce(
       (sum, account) => sum + account.currentBalance, 0
     );
-    
+
     console.log(`口座取得成功: ${accounts.length}件, 合計残高: ${totalCurrentBalance}`);
-    
-    return { 
-      data: accounts, 
-      totalCurrentBalance, 
-      error: null 
+
+    return {
+      data: accounts,
+      totalCurrentBalance,
+      error: null
     };
   } catch (error: any) {
     console.error("口座取得中にエラー発生:", error);
-    return { 
-      data: [], 
-      totalCurrentBalance: 0, 
-      error: error.message || "予期せぬエラーが発生しました" 
+    return {
+      data: [],
+      totalCurrentBalance: 0,
+      error: error.message || "予期せぬエラーが発生しました"
     };
   }
 }
@@ -102,7 +102,7 @@ export async function getAccount(accountId: string) {
       .eq('id', accountId)
       .eq('user_id', user.id)
       .single();
-      
+
     if (error) {
       console.error("口座データ取得エラー:", error);
       return { success: false, message: error.message };
@@ -116,7 +116,7 @@ export async function getAccount(accountId: string) {
       .eq('user_id', user.id)
       .order('transaction_date', { ascending: false })
       .limit(10);
-      
+
     if (txError) {
       console.error("取引データ取得エラー:", txError);
       // トランザクションのエラーは致命的ではないので続行
@@ -133,7 +133,7 @@ export async function getAccount(accountId: string) {
 
     // デバッグ情報
     console.log(`口座ID: ${accountId} の取引データ: ${transactions?.length || 0}件`);
-    
+
     return {
       success: true,
       data: account,
@@ -166,21 +166,21 @@ export async function addAccount(accountData: {
 
     // ユーザー認証確認
     const user = await getServerUser();
-    
+
     if (!user || !accountData.userId || user.id !== accountData.userId) {
       return {
         success: false,
         error: "認証エラーか無効なユーザーIDです"
       };
     }
-    
-    console.log("口座追加リクエスト:", { 
-      type: accountData.type, 
+
+    console.log("口座追加リクエスト:", {
+      type: accountData.type,
       name: accountData.name
     });
-    
+
     const supabase = getSupabase();
-    
+
     // データの準備 - 明示的にnullではなくデータまたは空文字を設定
     const supabaseAccountData = {
       user_id: accountData.userId,
@@ -192,7 +192,7 @@ export async function addAccount(accountData: {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
-    
+
     // デバッグ情報
     console.log('Supabaseに送信するデータ:', {
       ...supabaseAccountData,
@@ -200,14 +200,14 @@ export async function addAccount(accountData: {
       name_empty: supabaseAccountData.name === '',
       name_null: supabaseAccountData.name === null
     });
-    
+
     // Supabaseにデータを挿入
     const { data, error } = await supabase
       .from('bank_accounts')
       .insert(supabaseAccountData)
       .select()
       .single();
-    
+
     if (error) {
       console.error("口座追加エラー:", error);
       return {
@@ -215,12 +215,12 @@ export async function addAccount(accountData: {
         error: error.message || "口座の追加に失敗しました"
       };
     }
-    
+
     console.log("口座追加成功:", data.id);
-    
+
     // キャッシュ更新
     revalidatePath('/my-account');
-    
+
     return {
       success: true,
       data: { id: data.id },
@@ -246,23 +246,23 @@ export async function deleteAccount(id: string, userId: string): Promise<DeleteA
         error: "認証エラーが発生しました"
       };
     }
-    
+
     const supabase = getSupabase();
-    
+
     // 口座が存在するか確認し、同時に所有権も確認
     const { data: accountData, error: fetchError } = await supabase
       .from('bank_accounts')
       .select('user_id')
       .eq('id', id)
       .single();
-    
+
     if (fetchError) {
       return {
         success: false,
         error: "口座が見つかりません"
       };
     }
-    
+
     // 自分の口座か確認
     if (accountData.user_id !== userId) {
       return {
@@ -270,25 +270,25 @@ export async function deleteAccount(id: string, userId: string): Promise<DeleteA
         error: "この操作は許可されていません"
       };
     }
-    
+
     // 口座削除
     const { error: deleteError } = await supabase
       .from('bank_accounts')
       .delete()
       .eq('id', id);
-    
+
     if (deleteError) {
       throw deleteError;
     }
-    
+
     console.log("口座削除成功:", id);
-    
+
     // キャッシュ更新
     revalidatePath('/my-account');
-    
-    return { 
+
+    return {
       success: true,
-      error: null 
+      error: null
     };
   } catch (error: any) {
     console.error("口座削除中にエラー発生:", error);
@@ -312,30 +312,30 @@ export async function updateAccount(id: string, accountData: {
   try {
     // ユーザー認証確認
     const user = await getServerUser();
-    
+
     if (!user) {
       return {
         success: false,
         error: "認証エラーが発生しました"
       };
     }
-    
+
     const supabase = getSupabase();
-    
+
     // 口座が存在するか確認
     const { data: existingAccount, error: fetchError } = await supabase
       .from('bank_accounts')
       .select('user_id')
       .eq('id', id)
       .single();
-    
+
     if (fetchError) {
       return {
         success: false,
         error: "口座が見つかりません"
       };
     }
-    
+
     // 権限チェック（自分の口座かどうか）
     if (existingAccount.user_id !== user.id) {
       return {
@@ -343,7 +343,7 @@ export async function updateAccount(id: string, accountData: {
         error: "この操作は許可されていません"
       };
     }
-    
+
     // 更新するデータを整形
     const updateData = {
       name: accountData.name,
@@ -351,29 +351,29 @@ export async function updateAccount(id: string, accountData: {
       current_balance: accountData.currentBalance,
       updated_at: new Date().toISOString()
     };
-    
+
     if (accountData.mask) {
       updateData['mask'] = accountData.mask;
     }
     if (accountData.accountNumber) {
       updateData['account_number'] = accountData.accountNumber;
     }
-    
+
     // データベースを更新
     const { error: updateError } = await supabase
       .from('bank_accounts')
       .update(updateData)
       .eq('id', id);
-    
+
     if (updateError) {
       throw updateError;
     }
-    
+
     console.log("口座更新成功:", id);
-    
+
     // キャッシュ更新
     revalidatePath('/my-account');
-    
+
     return {
       success: true,
       error: null

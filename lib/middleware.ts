@@ -6,10 +6,10 @@ import type { NextRequest } from 'next/server';
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
   const supabase = createMiddlewareClient({ req, res });
-  
+
   // セッション更新・取得
   const { data: { session } } = await supabase.auth.getSession();
-  
+
   // ログイン必須ページでセッションがない場合、サインインにリダイレクト
   if (!session && (
     req.nextUrl.pathname.startsWith('/my-accounts') ||
@@ -20,15 +20,15 @@ export async function middleware(req: NextRequest) {
     redirectUrl.searchParams.set('redirect', '/'); // ここを固定で '/' に
     return NextResponse.redirect(redirectUrl);
   }
-  
+
   // サインインページにすでにログイン済みでアクセスした場合はホームにリダイレクト
   if (session && (
-    req.nextUrl.pathname === '/sign-in' || 
+    req.nextUrl.pathname === '/sign-in' ||
     req.nextUrl.pathname === '/sign-up'
   )) {
     return NextResponse.redirect(new URL('/', req.url));
   }
-  
+
   return res;
 }
 

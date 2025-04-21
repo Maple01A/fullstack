@@ -21,7 +21,7 @@ export const getSupabase = () => {
 
   // クッキーストアの取得
   const cookieStore = cookies();
-  
+
   // サーバーサイドSupabaseクライアントの作成
   return createClient(supabaseUrl, supabaseKey, {
     auth: {
@@ -39,13 +39,13 @@ export const getSupabase = () => {
 // 認証済みSupabaseクライアントを取得する関数
 export const getAuthSupabase = async () => {
   const supabase = getSupabase();
-  
+
   // セッションが有効か確認
   const { data: { session } } = await supabase.auth.getSession();
-  
+
   if (!session) {
     throw new Error('認証されていません');
   }
-  
+
   return supabase;
 };

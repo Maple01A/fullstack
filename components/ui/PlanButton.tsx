@@ -15,7 +15,7 @@ interface ConfirmPlanButtonProps {
   description?: string;
 }
 
-export default function ConfirmPlanButton({ 
+export default function ConfirmPlanButton({
   planId,
   title,
   type,
@@ -30,10 +30,10 @@ export default function ConfirmPlanButton({
 
   const handleConfirm = async () => {
     if (isLoading) return;
-    
+
     try {
       setIsLoading(true);
-      
+
       // 必要なデータが揃っているか確認
       if (!accountId) {
         alert('口座が設定されていないため取引を作成できません。予定の編集画面から口座を設定してください。');
@@ -42,13 +42,13 @@ export default function ConfirmPlanButton({
 
       // セッションからユーザーIDを取得
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      
+
       // セッションエラー処理を追加
       if (sessionError) {
         console.error("セッション取得エラー:", sessionError);
         throw new Error("認証セッションの取得に失敗しました");
       }
-      
+
       if (!sessionData?.session?.user) {
         console.error("セッションからユーザーIDを取得できません");
         // ユーザーに再ログインを促す
@@ -56,7 +56,7 @@ export default function ConfirmPlanButton({
         router.push('/sign-in');
         return;
       }
-      
+
       const userId = sessionData.session.user.id;
       console.log("確定処理 - 認証ユーザーID:", userId);
 
@@ -89,12 +89,12 @@ export default function ConfirmPlanButton({
         .select('current_balance')
         .eq('id', accountId)
         .single();
-        
+
       if (accountError) {
         console.error("口座情報取得エラー:", accountError);
         throw new Error(`口座情報の取得に失敗しました: ${accountError.message}`);
       }
-      
+
       // 残高更新
       let newBalance = account.current_balance;
       if (type === 'income') {
@@ -102,20 +102,20 @@ export default function ConfirmPlanButton({
       } else {
         newBalance -= Math.abs(Number(amount));
       }
-      
+
       const { error: updateError } = await supabase
         .from('bank_accounts')
-        .update({ 
+        .update({
           current_balance: newBalance,
           updated_at: new Date().toISOString()
         })
         .eq('id', accountId);
-        
+
       if (updateError) {
         console.error("口座残高更新エラー:", updateError);
         throw new Error(`口座残高の更新に失敗しました: ${updateError.message}`);
       }
-      
+
       // 3. 収支計画を完了としてマーク - テーブル名を修正（events）
       const { error: planError } = await supabase
         .from('events')
@@ -132,10 +132,10 @@ export default function ConfirmPlanButton({
 
       // 4. キャッシュを更新
       router.refresh();
-      
+
       // 5. 取引履歴ページに移動
       router.push('/transaction-history');
-      
+
     } catch (error) {
       console.error('収支計画確定エラー:', error);
       alert('エラーが発生しました: ' + (error instanceof Error ? error.message : '不明なエラー'));

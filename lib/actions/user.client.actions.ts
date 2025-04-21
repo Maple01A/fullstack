@@ -1,4 +1,4 @@
-'use client';  
+'use client';
 
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { signInProps, signUpParams } from '@/types';
@@ -98,23 +98,23 @@ export const signOutAndRedirect = async (redirectPath = '/sign-in') => {
   try {
     // Supabaseでログアウト処理
     const { error } = await supabase.auth.signOut();
-    
+
     if (error) {
       console.error('ログアウトエラー:', error);
       return { error: error.message };
     }
-    
+
     // リダイレクト
     window.location.href = redirectPath;
     return { success: true };
   } catch (error) {
     console.error('ログアウト例外:', error);
-    
+
     // エラーが発生しても、安全のためリダイレクト
     setTimeout(() => {
       window.location.href = redirectPath;
     }, 500);
-    
+
     return { error: 'ログアウト中にエラーが発生しました' };
   }
 };
@@ -122,12 +122,12 @@ export const signOutAndRedirect = async (redirectPath = '/sign-in') => {
 export const logoutAccount = async () => {
   try {
     const { error } = await supabase.auth.signOut();
-    
+
     if (error) {
       console.error('ログアウトエラー:', error);
       return { error: error.message };
     }
-    
+
     return { success: true };
   } catch (error) {
     console.error('ログアウト例外:', error);

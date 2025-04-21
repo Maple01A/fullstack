@@ -16,28 +16,28 @@ export default function DeletePlanButton({ planId }: DeletePlanButtonProps) {
 
   const handleDelete = async () => {
     if (isLoading) return;
-    
+
     // 確認ダイアログ
     if (!confirm('この予定を削除してもよろしいですか？')) {
       return;
     }
-    
+
     try {
       setIsLoading(true);
-      
+
       // 収支計画を削除
       const { error } = await supabase
         .from('events') // テーブル名
         .delete()
         .eq('id', planId);
-      
+
       if (error) {
         throw new Error(`収支計画の削除に失敗しました: ${error.message}`);
       }
 
       // キャッシュを更新してページをリフレッシュ
       router.refresh();
-      
+
     } catch (error) {
       console.error('収支計画削除エラー:', error);
       alert('エラーが発生しました: ' + (error instanceof Error ? error.message : '不明なエラー'));

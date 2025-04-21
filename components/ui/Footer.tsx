@@ -6,16 +6,16 @@ import { FooterProps } from '@/types'
 
 const Footer = ({ user, type = 'desktop' }: FooterProps) => {
   const router = useRouter();
-  
+
   const handleLogOut = async () => {
     const loggedOut = await logoutAccount();
-    if(loggedOut) router.push('/sign-in');
+    if (loggedOut) router.push('/sign-in');
   }
 
-  const displayName = user?.name ? 
-    (typeof user.name === 'string' ? user.name[0] : (Array.isArray(user.name) ? user.name[0] : '?')) 
+  const displayName = user?.name ?
+    (typeof user.name === 'string' ? user.name[0] : (Array.isArray(user.name) ? user.name[0] : '?'))
     : (user?.firstName?.[0] || '?');
-  
+
   const fullName = user?.name || user?.firstName || 'ユーザー';
   const email = user?.email || 'メールアドレスなし';
 
@@ -36,7 +36,7 @@ const Footer = ({ user, type = 'desktop' }: FooterProps) => {
         </p>
       </div>
       <div className='footer_image' onClick={handleLogOut}>
-        <Image src='/icons/logout.svg' fill alt='logout'/>
+        <Image src='/icons/logout.svg' fill alt='logout' />
       </div>
     </footer>
   )
