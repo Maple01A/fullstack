@@ -208,7 +208,7 @@ export default function Home() {
                       cx="50%"
                       cy="50%"
                       innerRadius={0}
-                      outerRadius={80}
+                      outerRadius={100}
                       fill="#8884d8"
                       dataKey="value"
                       activeIndex={activeAccountIndex}
@@ -260,7 +260,7 @@ export default function Home() {
                       cx="50%"
                       cy="50%"
                       innerRadius={0}
-                      outerRadius={80}
+                      outerRadius={100}
                       fill="#8884d8"
                       dataKey="value"
                       activeIndex={activeCategoryIndex}

@@ -61,11 +61,11 @@ const AuthForm = ({ type }: { type: string }) => {
 
       // リダイレクト - 常にホームページに遷移
       setTimeout(() => {
-        window.location.href = '/';  // ホームページに固定
+        window.location.href = '/';  
       }, 1500);
     } catch (error) {
       console.error("セッション確認エラー:", error);
-      window.location.href = '/'; // エラー時もホームに
+      window.location.href = '/'; 
     }
   };
 
@@ -133,7 +133,7 @@ const AuthForm = ({ type }: { type: string }) => {
             }}
           >
             <Image
-              src='/icons/logo.svg'
+              src='/icons/logo.png'
               width={34}
               height={34}
               alt='logo'

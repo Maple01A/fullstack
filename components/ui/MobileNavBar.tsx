@@ -38,7 +38,7 @@ const MobileNavbar = ({ user }: MobileNavProps) => {
             <Link href='/'
               className='mb-12 cursor-pointer items-center gap-1 px-4  flex'>
               <Image
-                src='/icons/logo.svg'
+                src='/icons/logo.png'
                 width={34}
                 height={34}
                 alt='Logo'
