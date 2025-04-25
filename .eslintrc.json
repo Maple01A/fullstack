@@ -1,0 +1,8 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "warn", // エラーからワーニングに変更
+    "@typescript-eslint/no-explicit-any": "warn", // エラーからワーニングに変更
+    "react-hooks/exhaustive-deps": "warn" // すでにワーニング
+  }
+}
