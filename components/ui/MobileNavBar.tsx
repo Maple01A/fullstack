@@ -6,8 +6,6 @@ import {
   Sheet,
   SheetClose,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from '@/components/ui/Sheet'
 import Image from 'next/image'

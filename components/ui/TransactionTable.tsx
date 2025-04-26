@@ -1,7 +1,6 @@
 'use client';
 
 import { formatCurrency, formatDateShort } from '@/lib/utils';
-import Link from 'next/link';
 import { ArrowDownRight, ArrowUpRight, RefreshCw, Eye, Trash2 } from 'lucide-react';
 import type { Transaction, Account } from '@/types';
 import { useState } from 'react';

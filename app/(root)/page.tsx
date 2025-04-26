@@ -7,7 +7,7 @@ import { getClientAccounts } from '@/lib/actions/bank.client.actions';
 import { getClientTransactions } from '@/lib/actions/transaction.client.actions';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, Sector } from 'recharts';
 import { formatCurrency } from '@/lib/utils';
-import { Wallet, CreditCard, Building, Tag, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { format, subMonths } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import Link from 'next/link';
@@ -145,10 +145,6 @@ export default function Home() {
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
   const monthlyBalance = incomeTotal - expenseTotal;
-
-  const recentTransactions = transactions
-    .sort((a, b) => new Date(b.transaction_date || b.date).getTime() - new Date(a.transaction_date || a.date).getTime())
-    .slice(0, 5);
 
   if (loading) {
     return (

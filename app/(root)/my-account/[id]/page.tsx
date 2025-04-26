@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/Button';
 import { getAccount } from '@/lib/actions/bank.actions';
 import { getServerUser } from '@/lib/actions/user.server.actions';
 import { formatCurrency } from '@/lib/utils';
-import { ArrowLeft, Edit, CreditCard, Calendar, Tag, ArrowDownCircle, ArrowUpCircle, Wallet, CreditCard as CreditCardIcon } from 'lucide-react';
+import { ArrowLeft, Edit, CreditCard, Calendar, ArrowDownCircle, ArrowUpCircle, Wallet, CreditCard as CreditCardIcon } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { BankDetailsPageProps } from '@/types'
@@ -126,7 +126,7 @@ const BankDetailsPage = async ({ params }: BankDetailsPageProps) => {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日付</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">内容</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">取引名</th>
                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">金額</th>
                       </tr>
                     </thead>

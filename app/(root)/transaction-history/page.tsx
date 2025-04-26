@@ -6,7 +6,7 @@ import { getTransactions } from '@/lib/actions/transaction.actions';
 import { getAccounts } from '@/lib/actions/bank.actions';
 import { SearchParamProps } from '@/types';
 import Link from 'next/link';
-import { Plus, Search, ChevronDown, FileText } from 'lucide-react';
+import { Plus, Search, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { redirect } from 'next/navigation';
 import { Input } from '@/components/ui/Input';
@@ -136,7 +136,7 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
                                     <option value="">すべての口座</option>
                                     {accounts.map(account => (
                                         // appwriteItemIdをvalueとして使用
-                                        <option key={account.id} value={account.appwriteItemId}>
+                                        <option key={account.appwriteItemId} value={account.appwriteItemId}>
                                             {account.name}
                                         </option>
                                     ))}

@@ -2,7 +2,7 @@ import { getServerUser } from '@/lib/actions/user.server.actions';
 import { redirect } from 'next/navigation';
 import AddFinancialPlanForm from '@/components/ui/AddFinancialPlanForm';
 import { getAccounts } from '@/lib/actions/bank.actions';
-import { ArrowLeft, CalendarPlus, Ban } from 'lucide-react';
+import { ArrowLeft, CalendarPlus } from 'lucide-react';
 import Link from 'next/link';
 
 async function AddFinancialPlanPage() {
@@ -17,7 +17,7 @@ async function AddFinancialPlanPage() {
     const accountsResponse = await getAccounts({ userId: loggedIn.id });
     const accounts = accountsResponse.data || [];
 
-    // 口座がない場合のエラー表示（必要であれば）
+    // 口座がない場合は、口座登録を促す表示
     if (!accounts || accounts.length === 0) {
       return (
         <section className='flex flex-col w-full bg-gray-50 min-h-screen'>
@@ -92,7 +92,6 @@ async function AddFinancialPlanPage() {
 
           <div className="bg-white rounded-xl shadow-md p-8 text-center">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Ban size={28} className="text-red-500" />
             </div>
             <h2 className="text-xl font-semibold text-gray-800 mb-2">エラーが発生しました</h2>
             <p className="text-gray-600 mb-6">

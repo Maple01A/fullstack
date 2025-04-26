@@ -3,7 +3,9 @@
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { Account, AccountsResponse } from "@/types";
 
-// クライアント側でSupabaseクライアントを作成
+/**
+ * クライアント側で口座情報を取得する
+ */
 export async function getClientAccounts(userId: string): Promise<AccountsResponse> {
   try {
     if (!userId) {
@@ -15,8 +17,7 @@ export async function getClientAccounts(userId: string): Promise<AccountsRespons
     }
 
     const supabase = createClientComponentClient();
-
-    // ユーザーの銀行口座一覧を取得
+    
     const { data, error } = await supabase
       .from('bank_accounts')
       .select('*')
@@ -24,26 +25,17 @@ export async function getClientAccounts(userId: string): Promise<AccountsRespons
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("口座取得エラー:", error);
-      return {
-        data: [],
-        totalCurrentBalance: 0,
-        error: error.message || "口座情報の取得に失敗しました"
-      };
+      throw new Error(error.message || "口座情報の取得に失敗しました");
     }
 
-    if (!data || data.length === 0) {
-      return {
-        data: [],
-        totalCurrentBalance: 0,
-        error: null
-      };
+    if (!data?.length) {
+      return { data: [], totalCurrentBalance: 0, error: null };
     }
 
     // データ形式の変換
     const accounts: Account[] = data.map(account => ({
-      id: account.id, // 元のIDを保持
-      appwriteItemId: account.id, // 互換性のためIDを複製
+      id: account.id,
+      appwriteItemId: account.id,
       name: account.name || '',
       type: account.type || 'depository',
       mask: account.mask || '',
@@ -62,12 +54,12 @@ export async function getClientAccounts(userId: string): Promise<AccountsRespons
       totalCurrentBalance,
       error: null
     };
-  } catch (error: any) {
-    console.error("口座取得中にエラー発生:", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "予期せぬエラーが発生しました";
     return {
       data: [],
       totalCurrentBalance: 0,
-      error: error.message || "予期せぬエラーが発生しました"
+      error: message
     };
   }
 }

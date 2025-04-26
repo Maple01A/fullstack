@@ -9,16 +9,12 @@ import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/Button'
 import {
   Form,
-  FormControl,
-  FormField,
-  FormLabel,
-  FormMessage,
 } from '@/components/ui/Form'
 import CustomInput from '@/components/ui/CustomInput'
 import { authFormSchema } from '@/lib/utils'
 import { Loader2, CheckCircle, AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { getLoggedInUser, singIn as signIn, singUp as signUp } from '@/lib/actions/user.client.actions'
+import { singIn as signIn, singUp as signUp } from '@/lib/actions/user.client.actions'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/lib/superbase'
 import { formVariants, inputVariants, buttonVariants, messageVariants } from '@/lib/authAnimations'

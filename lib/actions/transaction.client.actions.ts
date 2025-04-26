@@ -1,9 +1,34 @@
 'use client';
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-// クライアント側でトランザクションを取得する関数
-export async function getClientTransactions(params = {}) {
+interface TransactionParams {
+  userId: string;
+  accountId?: string;
+  page?: number;
+  limit?: number;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+  type?: string;
+}
+
+interface TransactionData {
+  title: string;
+  amount: number;
+  type: string;
+  userId: string;
+  transactionDate: string;
+  accountId: string;
+  category?: string | null;
+  description?: string | null;
+}
+
+/**
+ * クライアント側でトランザクションを取得する関数
+ */
+export async function getClientTransactions(params: TransactionParams = { userId: '' }) {
   try {
     const {
       userId,
@@ -28,6 +53,8 @@ export async function getClientTransactions(params = {}) {
     }
 
     const supabase = createClientComponentClient();
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
 
     // 検索クエリ構築
     let query = supabase
@@ -35,33 +62,12 @@ export async function getClientTransactions(params = {}) {
       .select('*', { count: 'exact' })
       .eq('user_id', userId);
 
-    // 口座フィルター
-    if (accountId) {
-      query = query.eq('account_id', accountId);
-    }
-
-    // 検索ワードフィルター
-    if (search) {
-      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
-    }
-
-    // 日付フィルター
-    if (startDate) {
-      query = query.gte('transaction_date', startDate);
-    }
-
-    if (endDate) {
-      query = query.lte('transaction_date', endDate);
-    }
-
-    // 取引種別フィルター
-    if (type) {
-      query = query.eq('type', type);
-    }
-
-    // ページネーション用の範囲を計算
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
+    // 各種フィルター適用
+    if (accountId) query = query.eq('account_id', accountId);
+    if (search) query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+    if (startDate) query = query.gte('transaction_date', startDate);
+    if (endDate) query = query.lte('transaction_date', endDate);
+    if (type) query = query.eq('type', type);
 
     // データ取得
     const { data: transactions, error, count } = await query
@@ -69,7 +75,6 @@ export async function getClientTransactions(params = {}) {
       .range(from, to);
 
     if (error) {
-      console.error('トランザクション取得エラー:', error);
       return {
         data: [],
         total: 0,
@@ -80,11 +85,7 @@ export async function getClientTransactions(params = {}) {
       };
     }
 
-    // 合計ページ数計算
-    const totalItems = count || 0;
-    const totalPages = Math.ceil(totalItems / limit);
-
-    // 収支の合計を計算するためのクエリ
+    // 合計計算のためのクエリ
     const { data: totals } = await supabase
       .from('transactions')
       .select('type, amount')
@@ -92,61 +93,52 @@ export async function getClientTransactions(params = {}) {
       .gte('transaction_date', startDate || '')
       .lte('transaction_date', endDate || '');
 
-    let expenseTotal = 0;
-    let incomeTotal = 0;
+    // 収支集計
+    const expenseTotal = totals
+      ?.filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
 
-    if (totals && totals.length > 0) {
-      expenseTotal = totals
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + Number(t.amount), 0);
-
-      incomeTotal = totals
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + Number(t.amount), 0);
-    }
+    const incomeTotal = totals
+      ?.filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
 
     return {
       data: transactions || [],
-      total: totalItems,
-      totalPages,
+      total: count || 0,
+      totalPages: Math.ceil((count || 0) / limit),
       expenseTotal,
       incomeTotal,
       error: null
     };
-  } catch (error: any) {
-    console.error('トランザクション取得中にエラー:', error);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '予期せぬエラーが発生しました';
     return {
       data: [],
       total: 0,
       totalPages: 0,
       expenseTotal: 0,
       incomeTotal: 0,
-      error: error.message || '予期せぬエラーが発生しました'
+      error: message
     };
   }
 }
 
-// クライアント側からトランザクションを追加する関数
-export async function addTransaction(data: {
-  title: string;
-  amount: number;
-  type: string;
-  userId: string;
-  transactionDate: string;
-  accountId: string;
-  category?: string | null;
-  description?: string | null;
-}) {
+/**
+ * クライアント側からトランザクションを追加する関数
+ */
+export async function addTransaction(data: TransactionData) {
   try {
     const supabase = createClientComponentClient();
 
-    // セッションからユーザーIDを取得
+    // セッション確認
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData?.session?.user) {
       return { success: false, error: "認証エラー: ログインが必要です" };
     }
 
-    // トランザクションデータを準備
+    const now = new Date().toISOString();
+    
+    // トランザクションデータ作成
     const transactionData = {
       title: data.title,
       type: data.type,
@@ -156,11 +148,11 @@ export async function addTransaction(data: {
       category: data.category || null,
       description: data.description || null,
       transaction_date: data.transactionDate,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      created_at: now,
+      updated_at: now
     };
 
-    // トランザクションを挿入
+    // トランザクションを登録
     const { data: result, error } = await supabase
       .from('transactions')
       .insert(transactionData)
@@ -171,7 +163,7 @@ export async function addTransaction(data: {
       return { success: false, error: error.message };
     }
 
-    // 口座の残高も更新
+    // 口座残高更新
     await updateAccountBalance(supabase, {
       accountId: data.accountId,
       amount: data.amount,
@@ -179,17 +171,19 @@ export async function addTransaction(data: {
     });
 
     return { success: true, data: result };
-  } catch (error: any) {
-    return { success: false, error: error.message || "予期せぬエラーが発生しました" };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "予期せぬエラーが発生しました";
+    return { success: false, error: message };
   }
 }
 
-// 口座残高更新のヘルパー関数
-async function updateAccountBalance(supabase: any, data: {
-  accountId: string,
-  amount: number,
-  type: string
-}) {
+/**
+ * 口座残高更新のヘルパー関数
+ */
+async function updateAccountBalance(
+  supabase: SupabaseClient,
+  data: { accountId: string; amount: number; type: string }
+) {
   try {
     // 口座情報を取得
     const { data: account } = await supabase
@@ -200,14 +194,10 @@ async function updateAccountBalance(supabase: any, data: {
 
     if (!account) return;
 
-    let newBalance = account.current_balance;
-
-    // 取引タイプに応じて残高を更新
-    if (data.type === 'income') {
-      newBalance += data.amount;
-    } else if (data.type === 'expense') {
-      newBalance -= data.amount;
-    }
+    // 取引タイプに応じて残高を計算
+    const newBalance = data.type === 'income'
+      ? account.current_balance + data.amount
+      : account.current_balance - data.amount;
 
     // 残高を更新
     await supabase
@@ -219,7 +209,6 @@ async function updateAccountBalance(supabase: any, data: {
       .eq('id', data.accountId);
 
   } catch (error) {
-    console.error('残高更新エラー:', error);
     throw error;
   }
 }

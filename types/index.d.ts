@@ -1,367 +1,7 @@
-/* eslint-disable no-unused-vars */
 
-declare type SearchParamProps = {
-  params: { [key: string]: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
+// ============= 基本型 =============
 
-// ========================================
-
-declare type SignUpParams = {
-  firstName: string;
-  lastName: string;
-  address: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  dateOfBirth: string;
-  email: string;
-  password: string;
-};
-
-declare type LoginUser = {
-  email: string;
-  password: string;
-};
-
-declare type User = {
-  id: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-};
-
-declare type NewUserParams = {
-  userId: string;
-  email: string;
-  name: string;
-  password: string;
-};
-
-declare type Account = {
-  id: string;
-  availableBalance: number;
-  currentBalance: number;
-  mask: string;
-  institutionId: string;
-  name: string;
-  type: string;
-  appwriteItemId: string;
-  sharableId: string;
-};
-
-declare type Transaction = {
-  id: string;
-  $id: string;
-  name: string;
-  paymentChannel: string;
-  type: string;
-  accountId: string;
-  amount: number;
-  pending: boolean;
-  category: string;
-  date: string;
-  image: string;
-  type: string;
-  $createdAt: string;
-  channel: string;
-  senderBankId: string;
-  receiverBankId: string;
-};
-
-declare type Bank = {
-  $id: string;
-  accountId: string;
-  bankId: string;
-  accessToken: string;
-  fundingSourceUrl: string;
-  userId: string;
-  shareableId: string;
-};
-
-declare type AccountTypes =
-  | "depository"
-  | "credit"
-  | "loan "
-  | "investment"
-  | "other";
-
-declare type Category = "Food and Drink" | "Travel" | "Transfer";
-
-declare type CategoryCount = {
-  name: string;
-  count: number;
-  totalCount: number;
-};
-
-declare type Receiver = {
-  firstName: string;
-  lastName: string;
-};
-
-declare type TransferParams = {
-  sourceFundingSourceUrl: string;
-  destinationFundingSourceUrl: string;
-  amount: string;
-};
-
-declare type AddFundingSourceParams = {
-  dwollaCustomerId: string;
-  processorToken: string;
-  bankName: string;
-};
-
-declare type NewDwollaCustomerParams = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  type: string;
-  address: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  dateOfBirth: string;
-};
-
-declare interface CreditCardProps {
-  account: Account;
-  userName: string;
-  showBalance?: boolean;
-}
-
-declare interface BankInfoProps {
-  account: Account;
-  appwriteItemId?: string;
-  type: "full" | "card";
-}
-
-declare interface HeaderBoxProps {
-  type?: "title" | "greeting";
-  title: string;
-  subtext: string;
-  user?: string;
-}
-
-declare interface MobileNavProps {
-  user: User;
-}
-
-declare interface PageHeaderProps {
-  topTitle: string;
-  bottomTitle: string;
-  topDescription: string;
-  bottomDescription: string;
-  connectBank?: boolean;
-}
-
-declare interface PaginationProps {
-  page: number;
-  totalPages: number;
-}
-
-declare interface PlaidLinkProps {
-  user: User;
-  variant?: "primary" | "ghost";
-  dwollaCustomerId?: string;
-}
-
-// declare type User = sdk.Models.Document & {
-//   accountId: string;
-//   email: string;
-//   name: string;
-//   items: string[];
-//   accessToken: string;
-//   image: string;
-// };
-
-declare interface AuthFormProps {
-  type: "sign-in" | "sign-up";
-}
-
-declare interface BankDropdownProps {
-  accounts: Account[];
-  setValue?: UseFormSetValue<any>;
-  otherStyles?: string;
-}
-
-declare interface BankTabItemProps {
-  account: Account;
-  appwriteItemId?: string;
-}
-
-declare interface TotalBalanceBoxProps {
-  accounts: Account[];
-  totalBanks: number;
-  totalCurrentBalance: number;
-}
-
-declare interface FooterProps {
-  user: User;
-  type?: 'mobile' | 'desktop';
-}
-
-declare interface RightSidebarProps {
-  user: User;
-  transactions?: Transaction[];
-  banks?: Bank[] & Account[];
-}
-
-declare interface SiderbarProps {
-  user: User;
-}
-
-declare interface RecentTransactionsProps {
-  accounts: Account[];
-  transactions: Transaction[];
-  appwriteItemId: string;
-  page: number;
-}
-
-declare interface TransactionHistoryTableProps {
-  transactions: Transaction[];
-  page: number;
-}
-
-declare interface CategoryBadgeProps {
-  category: string;
-}
-
-declare interface TransactionTableProps {
-  transactions: Transaction[];
-}
-
-declare interface CategoryProps {
-  category: CategoryCount;
-}
-
-declare interface DoughnutChartProps {
-  accounts: Account[];
-}
-
-declare interface PaymentTransferFormProps {
-  accounts: Account[];
-}
-
-// Actions
-declare interface getAccountsProps {
-  userId: string;
-}
-
-declare interface getAccountProps {
-  appwriteItemId: string;
-}
-
-declare interface getInstitutionProps {
-  institutionId: string;
-}
-
-declare interface getTransactionsProps {
-  accessToken: string;
-}
-
-declare interface CreateFundingSourceOptions {
-  customerId: string; // Dwolla Customer ID
-  fundingSourceName: string; // Dwolla Funding Source Name
-  plaidToken: string; // Plaid Account Processor Token
-  _links: object; // Dwolla On Demand Authorization Link
-}
-
-declare interface CreateTransactionProps {
-  name: string;
-  amount: string;
-  senderId: string;
-  senderBankId: string;
-  receiverId: string;
-  receiverBankId: string;
-  email: string;
-}
-
-declare interface getTransactionsByBankIdProps {
-  bankId: string;
-}
-
-declare interface signInProps {
-  email: string;
-  password: string;
-}
-
-declare interface getUserInfoProps {
-  userId: string;
-}
-
-declare interface exchangePublicTokenProps {
-  publicToken: string;
-  user: User;
-}
-
-declare interface createBankAccountProps {
-  accessToken: string;
-  userId: string;
-  accountId: string;
-  bankId: string;
-  fundingSourceUrl: string;
-  shareableId: string;
-}
-
-declare interface getBanksProps {
-  userId: string;
-}
-
-declare interface getBankProps {
-  documentId: string;
-}
-
-declare interface getBankByAccountIdProps {
-  accountId: string;
-}
-
-declare interface CustomInputProps {
-  control: Control<any>;
-  name: string;
-  label: string;
-  placeholder: string;
-  type?: string;
-}
-
-declare interface BankCardProps {
-  account: Account;
-  userName: string;
-  showBalance?: boolean;
-  showActions?: boolean;
-}
-
-export interface Account {
-  appwriteItemId: string;
-  name: string;
-  type: 'depository' | 'credit' | 'paypay' | 'paidy' | 'other';
-  mask?: string;
-  accountNumber?: string;
-  currentBalance: number;
-  icon?: string | null;
-}
-
-export interface AccountsResponse {
-  data: Account[];
-  totalCurrentBalance: number;
-  error: string | null;
-}
-
-export interface AccountResponse {
-  data: Account | null;
-  error: string | null;
-}
-
-export interface AddAccountResponse {
-  success: boolean;
-  data?: { id: string };
-  error: string | null;
-}
-
-export interface DeleteAccountResponse {
-  success: boolean;
-  error: string | null;
-}
-
+// 認証関連
 export interface ServerUser {
   id: string;
   firstName?: string;
@@ -369,16 +9,10 @@ export interface ServerUser {
   email?: string;
 }
 
-export interface UserSession {
-  user: ServerUser | null;
-  isLoading: boolean;
-  error: string | null;
-}
-
-export type SignInFormValues = {
+export interface signInProps {
   email: string;
   password: string;
-};
+}
 
 export interface signUpParams {
   email: string;
@@ -387,21 +21,16 @@ export interface signUpParams {
   lastName: string;
 }
 
-export interface SearchParamProps {
-  searchParams?: {
-    page?: string;
-    search?: string;
-    accountId?: string;
-    type?: string;
-    startDate?: string;
-    endDate?: string;
-  };
+export interface SignInFormValues {
+  email: string;
+  password: string;
 }
 
-// 口座関連の型定義
+// 口座関連
 export type AccountType = 'depository' | 'credit' | 'paypay' | 'paidy' | 'other';
 
 export interface Account {
+  id?: string;
   appwriteItemId: string;
   name: string;
   type: AccountType;
@@ -433,15 +62,13 @@ export interface DeleteAccountResponse {
   error: string | null;
 }
 
-// ユーザー関連の型定義
-export interface ServerUser {
-  id: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
+export interface ApiResponse {
+  success: boolean;
+  data?: any;
+  error: string | null;
 }
 
-// トランザクション関連の型定義
+// トランザクション関連
 export type TransactionType = 'expense' | 'income' | 'transfer';
 
 export interface Transaction {
@@ -495,13 +122,86 @@ export interface TransactionResponse {
   error: string | null;
 }
 
-export interface SearchParamProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+// カテゴリ関連
+export interface CategoryCount {
+  name: string;
+  count: number;
+  totalCount: number;
 }
 
-//バンクアカウントIDページ
+// ============= コンポーネント用Props =============
+
+export interface SearchParamProps {
+  searchParams?: {
+    page?: string;
+    search?: string;
+    accountId?: string;
+    type?: string;
+    startDate?: string;
+    endDate?: string;
+  };
+}
+
 export interface BankDetailsPageProps {
   params: {
     id: string;
   };
+}
+
+export interface AuthFormProps {
+  type: "sign-in" | "sign-up";
+}
+
+export interface CustomInputProps {
+  control: Control<any>;
+  name: string;
+  label: string;
+  placeholder: string;
+  type?: string;
+}
+
+export interface BankCardProps {
+  account: Account;
+  userName: string;
+  showBalance?: boolean;
+  showActions?: boolean;
+}
+
+export interface PaginationProps {
+  page: number;
+  totalPages: number;
+}
+
+export interface BankDropdownProps {
+  accounts: Account[];
+  setValue?: any;
+  otherStyles?: string;
+}
+
+export interface TransactionTableProps {
+  transactions: Transaction[];
+  accounts?: Account[];
+}
+
+export interface DoughnutChartProps {
+  accounts: Account[];
+}
+
+export interface CategoryBadgeProps {
+  category: string;
+}
+
+export interface HeaderBoxProps {
+  type?: "title" | "greeting";
+  title: string;
+  subtext: string;
+  user?: string;
+}
+
+// ============= API関連 =============
+
+export interface UrlQueryParams {
+  params: string;
+  key: string;
+  value: string;
 }

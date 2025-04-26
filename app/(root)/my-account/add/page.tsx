@@ -1,6 +1,6 @@
 import AddBankForm from '@/components/ui/AddBankForm';
 import { getServerUser } from '@/lib/actions/user.server.actions';
-import { ArrowLeft, CreditCard, Ban } from 'lucide-react';
+import { ArrowLeft, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 

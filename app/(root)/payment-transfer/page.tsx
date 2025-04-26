@@ -5,7 +5,7 @@ import { getFinancialPlanEvents, cleanupExpiredEvents } from '@/lib/actions/plan
 import { getServerUser } from '@/lib/actions/user.server.actions';
 import { getAccounts } from '@/lib/actions/bank.actions';
 import { redirect } from 'next/navigation';
-import { Calendar, Wallet, TrendingUp, TrendingDown, Plus, Check } from 'lucide-react';
+import { TrendingUp, TrendingDown, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import PlanButton from '@/components/ui/PlanButton';
@@ -17,8 +17,6 @@ async function FinancialPlanPage() {
     if (!loggedIn) {
         return redirect('/sign-in');
     }
-
-    console.log("ログインユーザー情報:", loggedIn);
 
     // 日付関連の設定
     const today = new Date();
@@ -180,9 +178,9 @@ async function FinancialPlanPage() {
                                     ¥{projectedBalance.toLocaleString()}
                                 </p>
                             </div>
-                            <div className="flex justify-end pt-3">
-                                <Link href="/payment-transfer/add">
-                                    <Button className="flex items-center gap-2 shadow-md w-full sm:w-auto px-5 py-6 ml-auto">
+                            <div className="flex justify-center sm:justify-end pt-3">
+                                <Link href="/payment-transfer/add" className="w-full sm:w-auto">
+                                    <Button className="flex items-center gap-2 shadow-md w-full px-5 py-6">
                                         <Plus size={18} />
                                         <span className="font-medium">収支予定を追加</span>
                                     </Button>
@@ -340,9 +338,6 @@ async function FinancialPlanPage() {
                             <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
                                 エラー詳細: {error.message || "不明なエラー"}
                             </p>
-                            <Link href="/">
-                                <Button>ホームに戻る</Button>
-                            </Link>
                         </div>
                     </div>
                 </div>

@@ -1,90 +1,73 @@
-/* eslint-disable no-prototype-builtins */
+'use client';
+
 import { type ClassValue, clsx } from "clsx";
 import qs from "query-string";
 import { twMerge } from "tailwind-merge";
 import { z } from "zod";
 
 /**
- * クラス名を結合するユーティリティ関数
+ * Tailwindのクラスをマージするためのユーティリティ
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 /**
- * 日時フォーマット関連の関数
+ * 日付フォーマット関連の関数
  */
-export const formatDateTime = (dateString: Date) => {
-  const dateTimeOptions: Intl.DateTimeFormatOptions = {
+export function formatDateTime(dateString: Date) {
+  return new Intl.DateTimeFormat('ja-JP', {
     weekday: "short",
     month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "numeric",
-    hour12: true,
-  };
+  }).format(dateString);
+}
 
-  return new Intl.DateTimeFormat('ja-JP', dateTimeOptions).format(dateString);
-};
-
-export const formatDateOnly = (dateString: Date) => {
-  const dateOptions: Intl.DateTimeFormatOptions = {
+export function formatDateOnly(dateString: Date) {
+  return new Intl.DateTimeFormat('ja-JP', {
     year: "numeric",
     month: "short",
     day: "numeric",
-  };
+  }).format(dateString);
+}
 
-  return new Intl.DateTimeFormat('ja-JP', dateOptions).format(dateString);
-};
-
-// 日時をフォーマットする関数
-export function formatDateTimeDetailed(date: Date) {
-  const options: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  };
-
-  const dateTimeStr = date.toLocaleString('ja-JP', options);
-  const dateStr = date.toLocaleDateString('ja-JP', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
+export function formatDateShort(date: Date): string {
+  return date.toLocaleDateString('ja-JP', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
   });
-
-  return {
-    dateTime: dateTimeStr,
-    date: dateStr
-  };
 }
 
 /**
- * 数値フォーマット関連の関数
+ * 金額フォーマット関数
  */
-export const formatCurrency = (amount: number | string | undefined): string => {
-  if (amount === undefined || amount === null) {
-    return '¥0';
-  }
-
+export function formatCurrency(amount: number | string | undefined): string {
+  if (amount === undefined || amount === null) return '¥0';
+  
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-
+  
   return new Intl.NumberFormat('ja-JP', {
     style: 'currency',
     currency: 'JPY',
     minimumFractionDigits: 0
   }).format(numAmount);
-};
-
-export const parseStringify = (value: any) => JSON.parse(JSON.stringify(value));
-
-// 特殊文字を取り除く関数
-export function removeSpecialCharacters(str?: string): string {
-  if (!str) return '';
-  return str.replace(/[^\p{L}\p{N}\s]/gu, '');
 }
 
+export function formatAmount(amount: number): string {
+  return new Intl.NumberFormat("ja-JP", {
+    style: "currency",
+    currency: "JPY",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount);
+}
+
+/**
+ * URLクエリパラメータ関連関数
+ */
 interface UrlQueryParams {
   params: string;
   key: string;
@@ -93,7 +76,6 @@ interface UrlQueryParams {
 
 export function formUrlQuery({ params, key, value }: UrlQueryParams) {
   const currentUrl = qs.parse(params);
-
   currentUrl[key] = value;
 
   return qs.stringifyUrl(
@@ -105,6 +87,9 @@ export function formUrlQuery({ params, key, value }: UrlQueryParams) {
   );
 }
 
+/**
+ * 口座タイプに応じたスタイル
+ */
 export function getAccountTypeColors(type: AccountTypes) {
   switch (type) {
     case "depository":
@@ -114,7 +99,6 @@ export function getAccountTypeColors(type: AccountTypes) {
         title: "text-blue-900",
         subText: "text-blue-700",
       };
-
     case "credit":
       return {
         bg: "bg-success-25",
@@ -122,7 +106,6 @@ export function getAccountTypeColors(type: AccountTypes) {
         title: "text-success-900",
         subText: "text-success-700",
       };
-
     default:
       return {
         bg: "bg-green-25",
@@ -133,78 +116,40 @@ export function getAccountTypeColors(type: AccountTypes) {
   }
 }
 
-export function countTransactionCategories(
-  transactions: Transaction[]
-): CategoryCount[] {
-  const categoryCounts: { [category: string]: number } = {};
+/**
+ * トランザクションのカテゴリ集計
+ */
+export function countTransactionCategories(transactions: Transaction[]): CategoryCount[] {
+  if (!transactions || !transactions.length) return [];
+  
+  const categoryCounts: Record<string, number> = {};
   let totalCount = 0;
 
-  // Iterate over each transaction
-  transactions &&
-    transactions.forEach((transaction) => {
-      // Extract the category from the transaction
-      const category = transaction.category;
+  transactions.forEach(({ category }) => {
+    categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+    totalCount++;
+  });
 
-      // If the category exists in the categoryCounts object, increment its count
-      if (categoryCounts.hasOwnProperty(category)) {
-        categoryCounts[category]++;
-      } else {
-        // Otherwise, initialize the count to 1
-        categoryCounts[category] = 1;
-      }
-
-      // Increment total count
-      totalCount++;
-    });
-
-  // Convert the categoryCounts object to an array of objects
-  const aggregatedCategories: CategoryCount[] = Object.keys(categoryCounts).map(
-    (category) => ({
-      name: category,
-      count: categoryCounts[category],
-      totalCount,
-    })
-  );
-
-  // Sort the aggregatedCategories array by count in descending order
-  aggregatedCategories.sort((a, b) => b.count - a.count);
-
-  return aggregatedCategories;
-}
-
-export function extractCustomerIdFromUrl(url: string) {
-  // Split the URL string by '/'
-  const parts = url.split("/");
-
-  // Extract the last part, which represents the customer ID
-  const customerId = parts[parts.length - 1];
-
-  return customerId;
-}
-
-export function encryptId(id: string) {
-  return btoa(id);
-}
-
-export function decryptId(id: string) {
-  return atob(id);
+  return Object.entries(categoryCounts)
+    .map(([name, count]) => ({ name, count, totalCount }))
+    .sort((a, b) => b.count - a.count);
 }
 
 /**
- * トランザクション関連のユーティリティ
+ * トランザクションのステータス判定
  */
-export const getTransactionStatus = (date: Date) => {
+export function getTransactionStatus(date: Date) {
   const today = new Date();
   const twoDaysAgo = new Date(today);
   twoDaysAgo.setDate(today.getDate() - 2);
 
   return date > twoDaysAgo ? "Processing" : "Success";
-};
+}
 
 /**
  * 認証フォームスキーマ
  */
-export const authFormSchema = (type: string) => {
+export function authFormSchema(type: string) {
   if (type === 'sign-up') {
     return z.object({
       firstName: z.string().min(1, "名前は必須です"),
@@ -214,34 +159,37 @@ export const authFormSchema = (type: string) => {
     });
   }
 
-  // Sign-inのデフォルトスキーマ
   return z.object({
     email: z.string().email("有効なメールアドレスを入力してください"),
     password: z.string().min(1, "パスワードを入力してください"),
   });
-};
+}
 
 /**
- * デバッグ用のロギング関数（本番環境では無効）
+ * 文字列関連のユーティリティ
  */
-export const debugLog = (...args: any[]) => {
+export function removeSpecialCharacters(str?: string): string {
+  if (!str) return '';
+  return str.replace(/[^\p{L}\p{N}\s]/gu, '');
+}
+
+/**
+ * ID暗号化/復号
+ */
+export function encryptId(id: string) {
+  return btoa(id);
+}
+
+export function decryptId(id: string) {
+  return atob(id);
+}
+
+/**
+ * デバッグ用ユーティリティ
+ */
+export function debugLog(...args: unknown[]) {
   if (process.env.NODE_ENV !== 'production') {
     console.log(...args);
   }
-};
-
-export function formatAmount(amount: number): string {
-  const formatter = new Intl.NumberFormat("ja-JP", {
-    style: "currency",
-    currency: "JPY",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  });
-
-  return formatter.format(amount);
-}
-
-export function formatDateShort(date: Date): string {
-  return date.toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 

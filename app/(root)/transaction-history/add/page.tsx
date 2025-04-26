@@ -2,7 +2,7 @@ import { getServerUser } from '@/lib/actions/user.server.actions';
 import { redirect } from 'next/navigation';
 import AddTransactionForm from '@/components/ui/AddTransactionForm';
 import { getAccounts } from '@/lib/actions/bank.actions';
-import { ArrowLeft, ReceiptText, Ban } from 'lucide-react';
+import { ArrowLeft, ReceiptText} from 'lucide-react';
 import Link from 'next/link';
 
 const AddTransaction = async () => {
@@ -14,9 +14,6 @@ const AddTransaction = async () => {
 
   // ユーザーIDを正しく抽出 (getServerUser()の戻り値に合わせる)
   const userId = user.id; 
-
-  // デバッグ情報を追加
-  console.log('ユーザー情報:', { user, userId });
 
   try {
     // 口座情報を取得 - userId を正しく渡す
@@ -40,7 +37,6 @@ const AddTransaction = async () => {
             
             <div className="bg-white rounded-xl shadow-md p-8 text-center">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Ban size={28} className="text-red-500" />
               </div>
               <h2 className="text-xl font-semibold text-gray-800 mb-2">口座が登録されていません</h2>
               <p className="text-gray-600 mb-6">取引を追加するには、まず口座を登録してください。</p>
@@ -103,9 +99,7 @@ const AddTransaction = async () => {
           </div>
           
           <div className="bg-white rounded-xl shadow-md p-8 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Ban size={28} className="text-red-500" />
-            </div>
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">            </div>
             <h2 className="text-xl font-semibold text-gray-800 mb-2">エラーが発生しました</h2>
             <p className="text-gray-600 mb-6">
               口座情報の取得中にエラーが発生しました。<br />
