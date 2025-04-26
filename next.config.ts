@@ -1,18 +1,58 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // ...既存の設定
+import { NextConfig } from 'next';
+
+/**
+ * Next.jsの設定
+ * @see https://nextjs.org/docs/api-reference/next.config.js/introduction
+ */
+const nextConfig: NextConfig = {
+  // ビルド時のESLintチェックを無効化
   eslint: {
-    // ビルド時のESLintチェックを無効化
     ignoreDuringBuilds: true,
   },
+  
+  // ビルド時の型チェックを無効化
   typescript: {
-    // ビルド時の型チェックを無効化（オプション）
     ignoreBuildErrors: true,
   },
-  // 既存の実験的サーバーアクション設定を修正
+  
+  // 実験的機能の有効化
   experimental: {
-    serverActions: true, // booleanに変更
-  }
+    serverActions: true,
+  },
+  
+  // 画像最適化設定
+  images: {
+    domains: ['lh3.googleusercontent.com', 'res.cloudinary.com'],
+    formats: ['image/avif', 'image/webp'],
+  },
+  
+  // 外部URL設定
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+        ],
+      },
+    ];
+  },
+  
+  // 環境変数を公開用に設定
+  env: {
+    APP_URL: process.env.APP_URL,
+  },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import PlanButton from '@/components/ui/PlanButton';
 import DeletePlanButton from '@/components/ui/DeletePlanButton';
+import PlanCalendar from '@/components/ui/PlanCalendar';
 
 async function FinancialPlanPage() {
     const loggedIn = await getServerUser();
@@ -193,49 +194,10 @@ async function FinancialPlanPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
                         {/* ミニカレンダー */}
                         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-4">
-                            <div className="flex justify-between items-center mb-3">
-                                <h2 className="text-lg font-semibold">カレンダー</h2>
-                                <div className="flex space-x-2">
-                                    <button className="p-1 text-gray-600 hover:bg-gray-100 rounded">＜</button>
-                                    <span className="font-medium">{currentMonth}</span>
-                                    <button className="p-1 text-gray-600 hover:bg-gray-100 rounded">＞</button>
-                                </div>
-                            </div>
-
-                            {/* シンプルなカレンダー表示 */}
-                            <div className="grid grid-cols-7 gap-1 text-center text-sm mb-2">
-                                {['日', '月', '火', '水', '木', '金', '土'].map(day => (
-                                    <div key={day} className="font-medium text-gray-500">{day}</div>
-                                ))}
-                            </div>
-
-                            {/* カレンダー日付グリッド */}
-                            <div className="grid grid-cols-7 gap-1 text-center">
-                                {Array.from({ length: 35 }, (_, i) => {
-                                    const day = new Date(startDate);
-                                    day.setDate(startDate.getDate() + i);
-                                    const isCurrentMonth = day.getMonth() === today.getMonth();
-                                    const isToday = day.toDateString() === today.toDateString();
-                                    const dateKey = format(day, 'yyyy-MM-dd');
-                                    const hasEvents = eventsByDate[dateKey] && eventsByDate[dateKey].length > 0;
-
-                                    return (
-                                        <div
-                                            key={i}
-                                            className={`aspect-square flex flex-col justify-center items-center p-1 rounded-full
-                                                ${isCurrentMonth ? 'text-gray-800' : 'text-gray-400'} 
-                                                ${isToday ? 'bg-blue-100 font-bold' : ''}`}
-                                        >
-                                            <span>{format(day, 'd')}</span>
-                                            {hasEvents && (
-                                                <div className={`w-1.5 h-1.5 mt-0.5 rounded-full
-                                                    ${eventsByDate[dateKey].some(e => e.type === 'expense') ? 'bg-red-500' : 'bg-green-500'}`}>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                            <PlanCalendar 
+                                initialDate={today} 
+                                eventsByDate={eventsByDate} 
+                            />
                         </div>
 
                         {/* 今後の予定リスト - すべての予定を表示 */}
