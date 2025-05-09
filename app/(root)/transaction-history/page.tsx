@@ -10,7 +10,7 @@ import { Plus, Search, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { redirect } from 'next/navigation';
 import { Input } from '@/components/ui/Input';
-import { startOfMonth, endOfMonth, format } from 'date-fns';
+import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 
 
@@ -29,14 +29,10 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
     const startDateParam = searchParams?.startDate as string;
     const endDateParam = searchParams?.endDate as string;
 
-    // 日付フィルターのデフォルト値（現在の月）
-    const today = new Date();
-    const startDate = startDateParam
-        ? new Date(startDateParam)
-        : startOfMonth(today);
-    const endDate = endDateParam
-        ? new Date(endDateParam)
-        : endOfMonth(today);
+    // 日付フィルターのデフォルト値を削除（すべての取引を表示）
+    // URLに明示的に日付パラメータがある場合のみ日付フィルターを適用
+    const startDate = startDateParam ? new Date(startDateParam) : null;
+    const endDate = endDateParam ? new Date(endDateParam) : null;
 
     // トランザクションデータを取得
     const transactionResult = await getTransactions({
@@ -45,8 +41,8 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
         page,
         limit: 10,
         search,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
+        startDate: startDate ? startDate.toISOString() : undefined,
+        endDate: endDate ? endDate.toISOString() : undefined,
         type
     });
 
@@ -63,6 +59,11 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
             ? `${user.firstName} ${user.lastName}`
             : (user.firstName || user.email?.split('@')[0] || 'ゲスト')
     ) : 'ゲスト';
+
+    // 表示期間のテキスト
+    const displayPeriod = startDateParam && endDateParam
+        ? `${format(new Date(startDateParam), 'yyyy年MM月dd日', { locale: ja })} ～ ${format(new Date(endDateParam), 'yyyy年MM月dd日', { locale: ja })}`
+        : "すべての取引記録";
 
     return (
         <section className='home'>
@@ -135,7 +136,6 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
                                 >
                                     <option value="">すべての口座</option>
                                     {accounts.map(account => (
-                                        // appwriteItemIdをvalueとして使用
                                         <option key={account.appwriteItemId} value={account.appwriteItemId}>
                                             {account.name}
                                         </option>
@@ -167,7 +167,7 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
                                         id="startDate"
                                         name="startDate"
                                         type="date"
-                                        defaultValue={format(startDate, 'yyyy-MM-dd')}
+                                        defaultValue={startDateParam || ''}
                                         className="w-full"
                                     />
                                 </div>
@@ -177,7 +177,7 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
                                         id="endDate"
                                         name="endDate"
                                         type="date"
-                                        defaultValue={format(endDate, 'yyyy-MM-dd')}
+                                        defaultValue={endDateParam || ''}
                                         className="w-full"
                                     />
                                 </div>
@@ -193,13 +193,13 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
                     </details>
                 </div>
 
-                {/* 現在の表示期間 */}
+                {/* すべての取引記録 */}
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-semibold">
                         取引記録
                     </h2>
                     <div className="text-sm text-gray-500">
-                        表示期間: {format(startDate, 'yyyy年MM月dd日', { locale: ja })} ~ {format(endDate, 'yyyy年MM月dd日', { locale: ja })}
+                        {displayPeriod}
                     </div>
                 </div>
 
