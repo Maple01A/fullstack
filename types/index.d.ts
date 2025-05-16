@@ -30,7 +30,7 @@ export interface SignInFormValues {
 export type AccountType = 'depository' | 'credit' | 'paypay' | 'paidy' | 'other';
 
 export interface Account {
-  id?: string;
+  id: string;
   appwriteItemId: string;
   name: string;
   type: AccountType;
