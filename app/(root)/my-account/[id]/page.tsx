@@ -56,7 +56,7 @@ const BankDetailsPage = async ({ params }: BankDetailsPageProps) => {
                 showActions={false}
               />
             </div>
-            <Link href={`/my-account/edit/${account.appwriteItemId}`}>
+            <Link href={`/my-account/edit/${account.appwriteItemId || account.id}`}>
               <Button className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3">
                 <Edit size={16} />
                 口座情報を編集
