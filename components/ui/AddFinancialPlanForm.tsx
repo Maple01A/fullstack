@@ -238,7 +238,7 @@ const AddFinancialPlanForm = ({
                   <FormLabel className="text-sm font-medium">金額 <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="例: 10000"
+                      placeholder="10000"
                       {...field}
                       className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 h-9"
                       onChange={(e) => field.onChange(e.target.value.replace(/[^0-9]/g, ''))}
