@@ -98,7 +98,7 @@ const EditBankForm = ({ account }: EditBankFormProps) => {
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder="例: みずほ銀行普通預金"
+                  placeholder="PayPay銀行"
                   {...field}
                   className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
