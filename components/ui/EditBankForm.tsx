@@ -57,7 +57,7 @@ const EditBankForm = ({ account }: EditBankFormProps) => {
       setError(null);
 
       // 口座名、タイプ、残高のみを更新
-      const result = await updateAccount(account.appwriteItemId, {
+      const result = await updateAccount(account.id, {
         name: values.name,
         type: values.type,
         currentBalance: Number(values.currentBalance),
