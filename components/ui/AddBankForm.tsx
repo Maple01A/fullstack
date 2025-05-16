@@ -96,7 +96,7 @@ const AddBankForm = ({ userId }: { userId: string }) => {
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder="例: 普通銀行"
+                  placeholder="普通銀行"
                   {...field}
                   className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   // フォーカスが外れた時に空白を削除
