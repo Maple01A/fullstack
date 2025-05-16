@@ -223,8 +223,8 @@ const AuthForm = ({ type }: { type: string }) => {
                   animate="visible"
                   custom={0}
                 >
-                  <CustomInput control={form.control} name='firstName' label="姓" placeholder='例: 山田' />
-                  <CustomInput control={form.control} name='lastName' label="名" placeholder='例: 太郎' />
+                  <CustomInput control={form.control} name='firstName' label="姓" placeholder='テスト' />
+                  <CustomInput control={form.control} name='lastName' label="名" placeholder='サンプル' />
                 </motion.div>
               </>
             )}
@@ -235,7 +235,7 @@ const AuthForm = ({ type }: { type: string }) => {
               animate="visible"
               custom={type === 'sign-up' ? 1 : 0}
             >
-              <CustomInput control={form.control} name='email' label="メールアドレス" placeholder='例: your@email.com' />
+              <CustomInput control={form.control} name='email' label="メールアドレス" placeholder='DEMOの場合：mail@mail.com' />
             </motion.div>
 
             <motion.div
@@ -249,7 +249,7 @@ const AuthForm = ({ type }: { type: string }) => {
                 control={form.control}
                 name='password'
                 label="パスワード"
-                placeholder='8文字以上の英数字'
+                placeholder='DEMOの場合：password'
                 type={showPassword ? 'text' : 'password'}
               />
               <button
