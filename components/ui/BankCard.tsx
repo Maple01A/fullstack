@@ -88,7 +88,7 @@ const BankCard = ({ account, userName, showBalance = true, showActions = true }:
       }
 
       // Supabase APIエンドポイントを使用
-      const response = await fetch(`/api/bank/delete?id=${account.appwriteItemId}`, {
+      const response = await fetch(`/api/bank/delete?id=${account.id}`, {
         method: 'DELETE',
       });
 
@@ -109,13 +109,13 @@ const BankCard = ({ account, userName, showBalance = true, showActions = true }:
   // 口座編集ページへ遷移
   const handleEdit = () => {
     setIsLoading(true);
-    router.push(`/my-account/edit/${account.appwriteItemId}`);
+    router.push(`/my-account/edit/${account.id}`);
   };
 
   // 口座詳細ページへ遷移
   const handleView = () => {
     setIsLoading(true);
-    router.push(`/my-account/${account.appwriteItemId}`);
+    router.push(`/my-account/${account.id}`);
   };
 
   // アイコンのソースを適切に設定（空の文字列を回避）

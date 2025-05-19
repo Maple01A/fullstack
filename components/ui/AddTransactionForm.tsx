@@ -49,8 +49,7 @@ const AddTransactionForm = ({
     return {
       ...account,
       // appwriteItemIdは内部的なIDなので、これをidプロパティとして設定
-      originalId: account.appwriteItemId, // 元のIDも残しておく（必要な場合）
-      id: account.appwriteItemId // idプロパティをappwriteItemIdで追加
+      id: account.id // idプロパティをappwriteItemIdで追加
     };
   });
 

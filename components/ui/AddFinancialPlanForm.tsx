@@ -41,8 +41,7 @@ const AddFinancialPlanForm = ({
   const validatedAccounts = accounts.map(account => {
     return {
       ...account,
-      originalId: account.appwriteItemId,
-      id: account.appwriteItemId
+      id: account.id
     };
   });
 
@@ -272,7 +271,7 @@ const AddFinancialPlanForm = ({
                         <option value="">口座を選択してください</option>
                         {accounts.length > 0 ? (
                           accounts.map(account => (
-                            <option key={account.appwriteItemId} value={account.appwriteItemId}>
+                            <option key={account.id} value={account.id}>
                               {account.name}
                             </option>
                           ))

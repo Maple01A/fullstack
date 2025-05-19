@@ -136,7 +136,7 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
                                 >
                                     <option value="">すべての口座</option>
                                     {accounts.map(account => (
-                                        <option key={account.appwriteItemId} value={account.appwriteItemId}>
+                                        <option key={account.id} value={account.id}>
                                             {account.name}
                                         </option>
                                     ))}

@@ -190,7 +190,7 @@ const AccountSection = ({
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl'>
           {accounts.map((account) => (
             <BankCard
-              key={account.appwriteItemId}
+              key={account.id}
               account={account}
               userName={userName}
               showBalance={true}
