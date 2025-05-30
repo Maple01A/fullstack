@@ -31,7 +31,7 @@ export type AccountType = 'depository' | 'credit' | 'paypay' | 'paidy' | 'other'
 
 export interface Account {
   id: string;
-  appwriteItemId: string;
+  ItemId: string;
   name: string;
   type: AccountType;
   mask?: string;
