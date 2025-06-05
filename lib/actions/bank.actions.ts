@@ -44,7 +44,7 @@ export async function getAccounts({ userId }: { userId: string }): Promise<Accou
     // データ形式の変換
     const accounts: Account[] = data.map(account => ({
       id: account.id,
-      appwriteItemId: account.id,
+      ItemId: account.id,
       name: account.name || '',
       type: account.type || 'depository',
       mask: account.mask || '',

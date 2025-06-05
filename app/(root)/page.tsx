@@ -17,6 +17,7 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [allTimeTransactions, setAllTimeTransactions] = useState([]); // 全期間データ用
   const [totalBalance, setTotalBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [activeAccountIndex, setActiveAccountIndex] = useState(0);
@@ -34,8 +35,7 @@ export default function Home() {
     未分類: '#94A3B8'
   };
 
-  const sortedTransactions = [...transactions].sort((a, b) => {
-    // transaction_date を優先し、ない場合は created_at を使用
+  const sortedAllTimeTransactions = [...allTimeTransactions].sort((a, b) => {
     const dateA = new Date(a.transaction_date || a.created_at).getTime();
     const dateB = new Date(b.transaction_date || b.created_at).getTime();
     return dateB - dateA; // 降順（最新が先頭）
@@ -52,18 +52,29 @@ export default function Home() {
           setAccounts(accountsResponse.data || []);
           setTotalBalance(accountsResponse.totalCurrentBalance || 0);
 
-          // 過去1ヶ月分のデータを取得
+          // 収支サマリー用（過去1ヶ月分）のデータを取得
           const startDate = format(subMonths(new Date(), 1), 'yyyy-MM-dd');
           const endDate = format(new Date(), 'yyyy-MM-dd');
 
-          const transactionsResponse = await getClientTransactions({
+          // 月間サマリー用のトランザクション取得
+          const monthlyTransactionsResponse = await getClientTransactions({
             userId: userData.id,
             limit: 100,
             startDate,
             endDate
           });
+          
+          // 全期間のトランザクションを別途取得（期間指定なし）
+          const allTransactionsResponse = await getClientTransactions({
+            userId: userData.id,
+            limit: 500 // 取得数を増やして全期間をカバー
+          });
 
-          setTransactions(transactionsResponse.data || []);
+          // 月間サマリー用と最新取引表示用には直近1ヶ月のデータを使用
+          setTransactions(monthlyTransactionsResponse.data || []);
+          
+          // カテゴリ別支出グラフ用に全期間のデータを別の状態変数に保存
+          setAllTimeTransactions(allTransactionsResponse.data || []);
         }
       } catch (error) {
         console.error('データ読み込みエラー:', error);
@@ -108,7 +119,7 @@ export default function Home() {
     }));
 
   const expenseByCategory = {};
-  transactions.forEach(transaction => {
+  allTimeTransactions.forEach(transaction => { 
     if (transaction.type === 'expense') {
       let category = transaction.category || '未分類';
       switch (category) {
@@ -346,7 +357,7 @@ export default function Home() {
 
         <div className="bg-white p-3 rounded-xl shadow-sm">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold text-gray-800">最近の取引</h2>
+            <h2 className="text-lg font-bold text-gray-800">最近の取引（全期間）</h2>
             <Link href="/transaction-history">
               <span className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                 すべて見る
@@ -354,9 +365,9 @@ export default function Home() {
             </Link>
           </div>
 
-          {sortedTransactions.slice(0, 5).length > 0 ? (
+          {sortedAllTimeTransactions.slice(0, 5).length > 0 ? (
             <div className="divide-y">
-              {sortedTransactions.slice(0, 5).map((transaction) => (
+              {sortedAllTimeTransactions.slice(0, 5).map((transaction) => (
                 <div
                   key={transaction.id}
                   className="py-3 flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 rounded-lg px-2"

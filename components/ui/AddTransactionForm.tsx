@@ -44,12 +44,11 @@ const AddTransactionForm = ({
   userId: string,
   accounts: Account[]
 }) => {
-  // appwriteItemIdをそのまま使わず、idプロパティをSupabaseのIDに設定する
+
   const validatedAccounts = accounts.map(account => {
     return {
       ...account,
-      // appwriteItemIdは内部的なIDなので、これをidプロパティとして設定
-      id: account.id // idプロパティをappwriteItemIdで追加
+      id: account.id
     };
   });
 
@@ -92,7 +91,6 @@ const AddTransactionForm = ({
     const sourceAccount = validatedAccounts.find(a => a.id === values.accountId);
     if (!sourceAccount) return;
 
-    // sourceAccountIdにはappwriteItemIdではなく、単にidを使用
     const sourceAccountId = sourceAccount.id;
 
     // 元の口座を取得

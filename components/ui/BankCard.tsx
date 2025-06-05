@@ -58,7 +58,7 @@ const getIconForAccountType = (type: string): string => {
 
 interface BankCardProps {
   account: {
-    appwriteItemId: string;
+    ItemId: string;
     name: string;
     type: string;
     currentBalance: number;

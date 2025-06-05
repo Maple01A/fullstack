@@ -2,6 +2,18 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
+// キャッシュ設定の追加
+export const revalidate = 60; // 60秒間キャッシュ有効
+
+// レスポンスのキャッシュヘッダー設定
+function setCacheControlHeader(response: NextResponse, maxAge = 60) {
+  response.headers.set(
+    'Cache-Control', 
+    `max-age=${maxAge}, s-maxage=${maxAge}, stale-while-revalidate=60`
+  );
+  return response;
+}
+
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
@@ -33,10 +45,14 @@ export async function GET() {
       lastName: session.user.user_metadata?.lastName || '',
     } : null;
 
-    return NextResponse.json({
+    // レスポンスにキャッシュヘッダーを設定
+    const response = NextResponse.json({
       session: session ? { ...session, user: userData } : null,
       error: null
     });
+
+    // キャッシュヘッダーを設定
+    return setCacheControlHeader(response);
   } catch (err) {
     console.error('セッションAPI例外:', err);
     const errorMessage = err instanceof Error ? err.message : '不明なエラー';

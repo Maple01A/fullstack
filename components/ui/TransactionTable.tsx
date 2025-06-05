@@ -28,8 +28,7 @@ const TransactionsTable = ({ transactions, accounts }: TransactionsTableProps) =
   const getAccountName = (accountId: string) => {
     if (!accountId) return '不明な口座';
 
-    // まずappwriteItemIdでマッチを試す
-    const account = accounts.find(acc => acc.appwriteItemId === accountId);
+    const account = accounts.find(acc => acc.ItemId === accountId);
 
     // 見つからなければ直接IDで検索
     if (!account) {
