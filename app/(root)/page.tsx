@@ -357,7 +357,7 @@ export default function Home() {
 
         <div className="bg-white p-3 rounded-xl shadow-sm">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold text-gray-800">最近の取引（全期間）</h2>
+            <h2 className="text-lg font-bold text-gray-800">最近の取引</h2>
             <Link href="/transaction-history">
               <span className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                 すべて見る
