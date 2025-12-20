@@ -39,10 +39,12 @@ const formSchema = z.object({
 
 const AddTransactionForm = ({
   userId,
-  accounts = []
+  accounts = [],
+  onSuccess
 }: {
   userId: string,
-  accounts: Account[]
+  accounts: Account[],
+  onSuccess?: () => void
 }) => {
 
   const validatedAccounts = accounts.map(account => {
@@ -245,7 +247,11 @@ const AddTransactionForm = ({
 
       form.reset();
       router.refresh();
-      router.push('/transaction-history');
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push('/transaction-history');
+      }
     } catch (error: any) {
       setError(error.message || '取引の追加に失敗しました');
     } finally {

@@ -21,7 +21,7 @@ const formSchema = z.object({
   }),
 });
 
-const AddBankForm = ({ userId }: { userId: string }) => {
+const AddBankForm = ({ userId, onSuccess }: { userId: string; onSuccess?: () => void }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -66,7 +66,11 @@ const AddBankForm = ({ userId }: { userId: string }) => {
       } else {
         form.reset();
         router.refresh();
-        router.push('/my-account');
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          router.push('/my-account');
+        }
       }
     } catch (error: any) {
       console.error('例外発生:', error);

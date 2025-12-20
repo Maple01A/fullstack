@@ -1,12 +1,11 @@
 import BankCard from '@/components/ui/BankCard';
 import HeaderBox from '@/components/ui/HeaderBox';
-import { Button } from '@/components/ui/Button';
 import { getAccounts } from '@/lib/actions/bank.actions';
 import { getServerUser } from '@/lib/actions/user.server.actions';
-import Link from 'next/link';
 import { Plus, Building, CreditCard, Wallet, Landmark } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import type { Account } from '@/types';
+import AddBankModal from './AddBankModal';
 
 
 // セッション確認とデータ取得を行うメインコンポーネント
@@ -81,12 +80,7 @@ function renderAccountsPage(user: any, accounts: { data: Account[], totalCurrent
                 <p className="text-2xl font-bold text-blue-700">¥{accounts.totalCurrentBalance.toLocaleString()}</p>
               </div>
             </div>
-            <Link href="/my-account/add">
-              <Button className="flex items-center gap-2 shadow-md w-full sm:w-auto px-5 py-6 ml-auto">
-                <Plus size={18} />
-                <span className="font-medium">新規口座を追加</span>
-              </Button>
-            </Link>
+            <AddBankModal userId={user.id} />
           </div>
         </div>
 

@@ -29,10 +29,12 @@ const formSchema = z.object({
 
 const AddFinancialPlanForm = ({
   userId,
-  accounts = []
+  accounts = [],
+  onSuccess
 }: {
   userId: string,
-  accounts: Account[]
+  accounts: Account[],
+  onSuccess?: () => void
 }) => {
   // Supabaseクライアントの初期化
   const supabase = createClientComponentClient();
@@ -120,7 +122,11 @@ const AddFinancialPlanForm = ({
 
       form.reset();
       router.refresh();
-      router.push('/payment-transfer');
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push('/payment-transfer');
+      }
 
     } catch (error: any) {
       console.error('Form submission error:', error);

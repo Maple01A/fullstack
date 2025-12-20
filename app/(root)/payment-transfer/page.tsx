@@ -5,12 +5,11 @@ import { getFinancialPlanEvents, cleanupExpiredEvents } from '@/lib/actions/plan
 import { getServerUser } from '@/lib/actions/user.server.actions';
 import { getAccounts } from '@/lib/actions/bank.actions';
 import { redirect } from 'next/navigation';
-import { TrendingUp, TrendingDown, Plus } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 import PlanButton from '@/components/ui/PlanButton';
 import DeletePlanButton from '@/components/ui/DeletePlanButton';
 import PlanCalendar from '@/components/ui/PlanCalendar';
+import AddFinancialPlanModal from './AddFinancialPlanModal';
 
 async function FinancialPlanPage() {
     const loggedIn = await getServerUser();
@@ -180,12 +179,7 @@ async function FinancialPlanPage() {
                                 </p>
                             </div>
                             <div className="flex justify-center sm:justify-end pt-3">
-                                <Link href="/payment-transfer/add" className="w-full sm:w-auto">
-                                    <Button className="flex items-center gap-2 shadow-md w-full px-5 py-6">
-                                        <Plus size={18} />
-                                        <span className="font-medium">収支予定を追加</span>
-                                    </Button>
-                                </Link>
+                                <AddFinancialPlanModal userId={loggedIn.id} accounts={accounts} />
                             </div>
                         </div>
                     </div>

@@ -5,13 +5,13 @@ import { getServerUser } from '@/lib/actions/user.server.actions';
 import { getTransactions } from '@/lib/actions/transaction.actions';
 import { getAccounts } from '@/lib/actions/bank.actions';
 import { SearchParamProps } from '@/types';
-import Link from 'next/link';
-import { Plus, Search, ChevronDown } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { redirect } from 'next/navigation';
 import { Input } from '@/components/ui/Input';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
+import AddTransactionModal from './AddTransactionModal';
 
 
 const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
@@ -92,12 +92,7 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
                                 </p>
                             </div>
                         </div>
-                        <Link href="/transaction-history/add">
-                            <Button className="flex items-center gap-2 shadow-md w-full sm:w-auto px-5 py-6 ml-auto">
-                                <Plus size={18} />
-                                <span className="font-medium">新規取引を追加</span>
-                            </Button>
-                        </Link>
+                        <AddTransactionModal userId={user.id} accounts={accounts} />
                     </div>
                 </div>
 
