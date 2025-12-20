@@ -25,7 +25,7 @@ export default function AddFinancialPlanModal({ userId, accounts }: AddFinancial
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button className="flex items-center gap-2 shadow-md w-full sm:w-auto px-5 py-6 ml-auto">
+        <Button className="flex items-center gap-2 shadow-md w-full sm:w-auto px-5 py-6 ml-auto bg-white text-gray-900 border border-gray-200 hover:bg-gray-50">
           <Plus size={18} />
           <span className="font-medium">収支予定を追加</span>
         </Button>

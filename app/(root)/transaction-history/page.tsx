@@ -98,7 +98,7 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
 
                 {/* 拡張検索エリア */}
                 <div className="mb-6 bg-white rounded-xl shadow-sm p-4">
-                    <details className="group">
+                    <details className="group" open>
                         <summary className="flex items-center justify-between cursor-pointer list-none">
                             <h3 className="text-lg font-medium">詳細検索</h3>
                             <ChevronDown className="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" />
