@@ -74,12 +74,32 @@ export async function getTransactions(params: GetTransactionsParams = {}) {
       .eq('user_id', userId);
 
     // フィルター適用
-    if (accountId) query = query.eq('account_id', accountId);
-    if (type) query = query.eq('type', type);
-    if (category) query = query.eq('category', category);
-    if (startDate) query = query.gte('transaction_date', startDate);
-    if (endDate) query = query.lte('transaction_date', endDate);
-    if (search?.trim()) query = query.ilike('description', `%${search.trim()}%`);
+    if (accountId) {
+      query = query.eq('account_id', accountId);
+    }
+    
+    if (type) {
+      query = query.eq('type', type);
+    }
+    
+    if (category) {
+      query = query.eq('category', category);
+    }
+    
+    // 日付フィルター（指定がある場合のみ）
+    if (startDate) {
+      query = query.gte('transaction_date', startDate);
+    }
+    
+    if (endDate) {
+      query = query.lte('transaction_date', endDate);
+    }
+    
+    // キーワード検索（title, description, categoryを対象）
+    if (search?.trim()) {
+      const searchTerm = search.trim();
+      query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`);
+    }
 
     // データ取得
     const { data, error, count } = await query
@@ -97,13 +117,24 @@ export async function getTransactions(params: GetTransactionsParams = {}) {
       };
     }
 
-    // 合計金額の計算
-    const { data: totals } = await supabase
+    // 合計金額の計算（フィルター条件を適用した結果に対して）
+    let totalsQuery = supabase
       .from('transactions')
       .select('type, amount')
-      .eq('user_id', userId)
-      .gte('transaction_date', startDate || '')
-      .lte('transaction_date', endDate || '');
+      .eq('user_id', userId);
+
+    // 同じフィルター条件を適用
+    if (accountId) totalsQuery = totalsQuery.eq('account_id', accountId);
+    if (type) totalsQuery = totalsQuery.eq('type', type);
+    if (category) totalsQuery = totalsQuery.eq('category', category);
+    if (startDate) totalsQuery = totalsQuery.gte('transaction_date', startDate);
+    if (endDate) totalsQuery = totalsQuery.lte('transaction_date', endDate);
+    if (search?.trim()) {
+      const searchTerm = search.trim();
+      totalsQuery = totalsQuery.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`);
+    }
+
+    const { data: totals } = await totalsQuery;
 
     const expenseTotal = totals?.filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + Number(t.amount), 0) || 0;

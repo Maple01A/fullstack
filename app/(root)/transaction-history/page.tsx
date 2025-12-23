@@ -5,13 +5,11 @@ import { getServerUser } from '@/lib/actions/user.server.actions';
 import { getTransactions } from '@/lib/actions/transaction.actions';
 import { getAccounts } from '@/lib/actions/bank.actions';
 import { SearchParamProps } from '@/types';
-import { Search, ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 import { redirect } from 'next/navigation';
-import { Input } from '@/components/ui/Input';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import AddTransactionModal from './AddTransactionModal';
+import TransactionSearchForm from './TransactionSearchForm';
 
 
 const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
@@ -97,96 +95,14 @@ const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
                 </div>
 
                 {/* 拡張検索エリア */}
-                <div className="mb-6 bg-white rounded-xl shadow-sm p-4">
-                    <details className="group" open>
-                        <summary className="flex items-center justify-between cursor-pointer list-none">
-                            <h3 className="text-lg font-medium">詳細検索</h3>
-                            <ChevronDown className="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" />
-                        </summary>
-
-                        <form className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* 検索キーワード */}
-                            <div>
-                                <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">キーワード</label>
-                                <div className="relative">
-                                    <Input
-                                        id="search"
-                                        name="search"
-                                        placeholder="取引内容を検索..."
-                                        defaultValue={search || ''}
-                                        className="pl-10 w-full"
-                                    />
-                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-                                </div>
-                            </div>
-
-                            {/* 口座フィルター */}
-                            <div>
-                                <label htmlFor="accountId" className="block text-sm font-medium text-gray-700 mb-1">口座</label>
-                                <select
-                                    id="accountId"
-                                    name="accountId"
-                                    defaultValue={accountId || ''}
-                                    className="w-full h-10 px-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                >
-                                    <option value="">すべての口座</option>
-                                    {accounts.map(account => (
-                                        <option key={account.id} value={account.id}>
-                                            {account.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* 取引タイプ */}
-                            <div>
-                                <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">取引タイプ</label>
-                                <select
-                                    id="type"
-                                    name="type"
-                                    defaultValue={type || ''}
-                                    className="w-full h-10 px-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                >
-                                    <option value="">すべてのタイプ</option>
-                                    <option value="income">収入</option>
-                                    <option value="expense">支出</option>
-                                    <option value="transfer">振替</option>
-                                </select>
-                            </div>
-
-                            {/* 日付範囲 */}
-                            <div className="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">開始日</label>
-                                    <Input
-                                        id="startDate"
-                                        name="startDate"
-                                        type="date"
-                                        defaultValue={startDateParam || ''}
-                                        className="w-full"
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">終了日</label>
-                                    <Input
-                                        id="endDate"
-                                        name="endDate"
-                                        type="date"
-                                        defaultValue={endDateParam || ''}
-                                        className="w-full"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* 検索ボタン */}
-                            <div className="md:col-span-2 flex justify-end gap-2 mt-2">
-                                <Button type="submit" className="flex items-center gap-2">
-                                    検索
-                                </Button>
-                            </div>
-                        </form>
-                    </details>
-                </div>
+                <TransactionSearchForm 
+                    accounts={accounts}
+                    defaultValues={{
+                        search,
+                        accountId,
+                        type
+                    }}
+                />
 
                 {/* すべての取引記録 */}
                 <div className="flex justify-between items-center mb-4">
