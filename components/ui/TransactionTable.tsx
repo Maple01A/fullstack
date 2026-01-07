@@ -83,6 +83,8 @@ const TransactionsTable = ({ transactions, accounts }: TransactionsTableProps) =
           type: 'success'
         });
 
+        setTimeout(() => setToast(null), 3000);
+
         // 画面を更新して残高の変更を反映（より強力な更新）
         router.refresh();
 
@@ -98,6 +100,8 @@ const TransactionsTable = ({ transactions, accounts }: TransactionsTableProps) =
           message: `削除に失敗しました: ${result.error}`,
           type: 'error'
         });
+
+        setTimeout(() => setToast(null), 3000);
       }
     } catch (error) {
       console.error('トランザクション削除エラー:', error);
@@ -105,6 +109,8 @@ const TransactionsTable = ({ transactions, accounts }: TransactionsTableProps) =
         message: '削除中にエラーが発生しました',
         type: 'error'
       });
+
+      setTimeout(() => setToast(null), 3000);
     } finally {
       setDeletingId(null);
     }

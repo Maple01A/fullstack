@@ -41,7 +41,7 @@ async function FinancialPlanPage() {
         // 収支計画のデータを取得
         const events = await getFinancialPlanEvents({
             startDate: startDate.toISOString(),
-            endDate: endOfMonth(addDays(today, 90)).toISOString() // 90日先まで取得
+            endDate: endOfMonth(addDays(today, 365)).toISOString() // 1年先まで取得
         });
 
         // デバッグ情報を詳細に出力
