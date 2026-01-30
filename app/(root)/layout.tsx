@@ -1,5 +1,6 @@
 import MobileNavbar from "@/components/ui/MobileNavBar";
 import Sidebar from "@/components/ui/Sidebar";
+import AnimatedBackground from "@/components/ui/AnimatedBackground";
 import { getServerUser } from "@/lib/actions/user.server.actions";
 import Image from 'next/image';
 import { redirect } from "next/navigation";
@@ -15,6 +16,7 @@ export default async function RootLayout({
 
   return (
     <main className="flex h-screen w-full font-inter">
+      <AnimatedBackground />
       <Sidebar user={loggedIn} />
       <div className="flex size-full flex-col">
         <div className="root-layout">

@@ -122,7 +122,7 @@ const BankCard = ({ account, userName, showBalance = true, showActions = true }:
   const iconSrc = account.icon || getIconForAccountType(account.type);
 
   return (
-    <div className={`relative rounded-xl border p-4 flex flex-col shadow-sm hover:shadow-md transition-all duration-200 ${getCardGradient(account.type)}`}>
+    <div className={`relative rounded-xl border p-4 flex flex-col shadow-sm hover:shadow-md transition-all duration-200 transform hover:-translate-y-1 hover:scale-[1.02] ${getCardGradient(account.type)}`}>
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
           <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getIconBackground(account.type)}`}>

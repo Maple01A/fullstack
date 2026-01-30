@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import HeaderBox from '@/components/ui/HeaderBox';
 import { getLoggedInUser } from '@/lib/actions/user.client.actions';
 import { getClientAccounts } from '@/lib/actions/bank.client.actions';
@@ -171,8 +172,15 @@ export default function Home() {
 
 
   return (
-    <section className='home'>
-      <div className='home-content'>
+    <motion.section 
+      className='home'
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div 
+        className='home-content'
+      >
         <header className='home-header'>
           <HeaderBox
             type='greeting'
@@ -402,7 +410,7 @@ export default function Home() {
             </div>
           )}
         </div>
-      </div>
-    </section>
+      </motion.div>
+    </motion.section>
   );
 }
