@@ -2,7 +2,7 @@ import BankCard from '@/components/ui/BankCard';
 import HeaderBox from '@/components/ui/HeaderBox';
 import { getAccounts } from '@/lib/actions/bank.actions';
 import { getServerUser } from '@/lib/actions/user.server.actions';
-import { Plus, Building, CreditCard, Wallet, Landmark } from 'lucide-react';
+import { Building, CreditCard, Wallet, Landmark } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import type { Account } from '@/types';
 import AddBankModal from './AddBankModal';
