@@ -5,11 +5,14 @@ import { getFinancialPlanEvents, cleanupExpiredEvents } from '@/lib/actions/plan
 import { getServerUser } from '@/lib/actions/user.server.actions';
 import { getAccounts } from '@/lib/actions/bank.actions';
 import { redirect } from 'next/navigation';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
 import PlanButton from '@/components/ui/PlanButton';
 import DeletePlanButton from '@/components/ui/DeletePlanButton';
 import PlanCalendar from '@/components/ui/PlanCalendar';
 import AddFinancialPlanModal from './AddFinancialPlanModal';
+import AddSubscriptionModal from './AddSubscriptionModal';
+import SubscriptionList from '@/components/ui/SubscriptionList';
+import { getSubscriptions, processSubscriptions, getSubscriptionPreviewEvents } from '@/lib/actions/subscription.actions';
 
 async function FinancialPlanPage() {
     const loggedIn = await getServerUser();
@@ -37,6 +40,19 @@ async function FinancialPlanPage() {
         } else {
             console.warn("期限切れイベントの削除に失敗しました");
         }
+
+        // サブスクの自動処理（今日が引き落とし日のサブスクをイベントとして追加）
+        const subscriptionResult = await processSubscriptions();
+        if (subscriptionResult.processedCount > 0) {
+            console.log(`${subscriptionResult.processedCount}件のサブスク引き落としを処理しました`);
+        }
+
+        // サブスク情報を取得
+        const { data: subscriptions } = await getSubscriptions();
+        console.log(`登録サブスク数: ${subscriptions.length}`);
+
+        // サブスクの将来予定を取得（カレンダー用）
+        const subscriptionPreviewEvents = await getSubscriptionPreviewEvents(12);
 
         // 収支計画のデータを取得
         const events = await getFinancialPlanEvents({
@@ -95,7 +111,17 @@ async function FinancialPlanPage() {
                 acc[dateKey].push(event);
             }
             return acc;
-        }, {});
+        }, {} as Record<string, any[]>);
+
+        // サブスクの将来予定もカレンダーに追加
+        subscriptionPreviewEvents.forEach(subEvent => {
+            const dateKey = subEvent.date;
+            if (!eventsByDate[dateKey]) eventsByDate[dateKey] = [];
+            eventsByDate[dateKey].push({
+                ...subEvent,
+                isSubscription: true
+            });
+        });
 
         // 日付ごとのイベント数を確認
         console.log("日付ごとのイベント数:",
@@ -159,7 +185,7 @@ async function FinancialPlanPage() {
 
                     {/* 収支の概要 - コンパクトカード */}
                     <div className="mt-2 mb-4">
-                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             <div className="py-3 px-5 rounded-lg shadow-md bg-white">
                                 <p className="text-sm text-gray-500">現在の合計残高</p>
                                 <p className="text-2xl font-bold text-blue-700">¥{totalCurrentBalance.toLocaleString()}</p>
@@ -178,11 +204,25 @@ async function FinancialPlanPage() {
                                     ¥{projectedBalance.toLocaleString()}
                                 </p>
                             </div>
-                            <div className="flex justify-center sm:justify-end pt-3">
-                                <AddFinancialPlanModal userId={loggedIn.id} accounts={accounts} />
-                            </div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row justify-end gap-2 mt-3">
+                            <AddFinancialPlanModal userId={loggedIn.id} accounts={accounts} />
+                            <AddSubscriptionModal userId={loggedIn.id} accounts={accounts} />
                         </div>
                     </div>
+
+                    {/* サブスク一覧セクション */}
+                    {subscriptions.length > 0 && (
+                        <div className="mb-4">
+                            <div className="bg-white rounded-xl shadow-sm p-4">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <RefreshCw className="h-5 w-5 text-blue-600" />
+                                    <h2 className="text-lg font-semibold">登録済みサブスク</h2>
+                                </div>
+                                <SubscriptionList subscriptions={subscriptions} accounts={accounts} />
+                            </div>
+                        </div>
+                    )}
 
                     {/* カレンダーと今後の予定 */}
                     <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">

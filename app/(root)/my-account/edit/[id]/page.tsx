@@ -53,7 +53,7 @@ export default async function EditBankPage({ params }: { params: { id: string } 
             <div className="flex items-center gap-3">
               <div>
                 <h1 className="text-lg font-semibold">「{bankName}」の編集</h1>
-                <p className="text-purple-100 text-sm">口座情報を更新します</p>
+                <p className="text-blue-100 text-sm">口座情報を更新します</p>
               </div>
             </div>
           </div>
