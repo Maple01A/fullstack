@@ -115,7 +115,7 @@ const SubscriptionList = ({ subscriptions, accounts }: SubscriptionListProps) =>
     return (
       <div className="bg-gray-50 rounded-lg p-8 text-center">
         <RefreshCw className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-        <p className="text-gray-600 mb-2">登録されているサブスクはありません</p>
+        <p className="text-gray-600 mb-2">登録されている定期払いはありません</p>
         <p className="text-sm text-gray-500">
           定期的な支払いを登録すると、自動で収支計画に追加されます
         </p>
