@@ -205,3 +205,50 @@ export interface UrlQueryParams {
   key: string;
   value: string;
 }
+
+// ============= サブスクリプション関連 =============
+
+export type RecurrenceType = 'monthly' | 'weekly' | 'yearly' | 'daily';
+
+export interface Subscription {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  amount: number;
+  type: 'income' | 'expense';
+  account_id: string;
+  category?: string;
+  recurrence_type: RecurrenceType;
+  recurrence_day: number; // 毎月の場合は日付(1-31)、毎週の場合は曜日(0-6)
+  start_date: string;
+  end_date?: string;
+  next_execution_date: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SubscriptionData {
+  title: string;
+  description?: string;
+  amount: number;
+  type: 'income' | 'expense';
+  account_id: string;
+  category?: string;
+  recurrence_type: RecurrenceType;
+  recurrence_day: number;
+  start_date: string;
+  end_date?: string;
+}
+
+export interface SubscriptionsResponse {
+  data: Subscription[];
+  error: string | null;
+}
+
+export interface SubscriptionResponse {
+  success: boolean;
+  data?: Subscription;
+  error: string | null;
+}
